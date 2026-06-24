@@ -1,0 +1,284 @@
+#include "Math/Mat2.hpp"
+#include "Math/MathAux.hpp"
+
+Mat2::Mat2() : Mat2(0) {}
+Mat2::Mat2(float fill) : Mat2(fill, fill, fill, fill) {}
+Mat2::Mat2(float l1c1, float l1c2, float l2c1, float l2c2)
+{
+	m[0][0] = l1c1;
+	m[0][1] = l1c2;
+	m[1][0] = l2c1;
+	m[1][1] = l2c2;
+}
+
+Mat2::Mat2(const Mat2& other) {
+	for (int l = 0; l < 2; l++) {
+		for (int c = 0; c < 2; c++) {
+			m[l][c] = other.m[l][c];
+		}
+	}
+}
+
+Mat2 Mat2::IDENTITY = {1, 0,
+					   0, 1};
+
+Mat2& Mat2::operator=(const Mat2& other) {
+	for (int l = 0; l < 2; l++) {
+		for (int c = 0; c < 2; c++) {
+			m[l][c] = other.m[l][c];
+		}
+	}
+	return *this;
+}
+
+Mat2& Mat2::operator+=(const Mat2& other) {
+	for (int l = 0; l < 2; l++) {
+		for (int c = 0; c < 2; c++) {
+			m[l][c] += other.m[l][c];
+		}
+	}
+	return *this;
+}
+
+Mat2& Mat2::operator-=(const Mat2& other) {
+	for (int l = 0; l < 2; l++) {
+		for (int c = 0; c < 2; c++) {
+			m[l][c] -= other.m[l][c];
+		}
+	}
+	return *this;
+}
+
+Mat2& Mat2::operator*=(const Mat2& other) {
+	Mat2 prod;
+	for (int l = 0; l < 2; l++) {
+		for (int c = 0; c < 2; c++) {
+			prod.m[l][c] = m[l][0] * other.m[0][c] + m[l][1] * other.m[1][c];
+		}
+	}
+	*this = prod;
+	return *this;
+}
+
+Mat2& Mat2::operator*=(float s) {
+	for (int l = 0; l < 2; l++) {
+		for (int c = 0; c < 2; c++) {
+			m[l][c] *= s;
+		}
+	}
+	return *this;
+}
+
+Mat2& Mat2::operator/=(float s) {
+	for (int l = 0; l < 2; l++) {
+		for (int c = 0; c < 2; c++) {
+			m[l][c] /= s;
+		}
+	}
+	return *this;
+}
+
+Mat2& Mat2::operator+=(float s) {
+	for (int l = 0; l < 2; l++) {
+		for (int c = 0; c < 2; c++) {
+			m[l][c] += s;
+		}
+	}
+	return *this;
+}
+
+Mat2& Mat2::operator-=(float s) {
+	for (int l = 0; l < 2; l++) {
+		for (int c = 0; c < 2; c++) {
+			m[l][c] -= s;
+		}
+	}
+	return *this;
+}
+
+bool Mat2::operator==(const Mat2& other) const {
+	for (int l = 0; l < 2; l++) {
+		for (int c = 0; c < 2; c++) {
+			if (!Cmpf(m[l][c], other.m[l][c]))
+				return false;
+		}
+	}
+	return true;
+}
+
+bool Mat2::operator!=(const Mat2& other) const {
+	return !(*this == other);
+}
+
+Mat2 Mat2::operator+(const Mat2& other) const {
+	Mat2 sum;
+	for (int l = 0; l < 2; l++) {
+		for (int c = 0; c < 2; c++) {
+			sum.m[l][c] = m[l][c] + other.m[l][c];
+		}
+	}
+	return sum;
+}
+
+Mat2 Mat2::operator-(const Mat2& other) const {
+	Mat2 diff;
+	for (int l = 0; l < 2; l++) {
+		for (int c = 0; c < 2; c++) {
+			diff.m[l][c] = m[l][c] - other.m[l][c];
+		}
+	}
+	return diff;
+}
+
+Mat2 Mat2::operator*(const Mat2& other) const {
+	Mat2 prod;
+	for (int l = 0; l < 2; l++) {
+		for (int c = 0; c < 2; c++) {
+			prod.m[l][c] = m[l][0] * other.m[0][c] + m[l][1] * other.m[1][c];
+		}
+	}
+	return prod;
+}
+
+Mat2 Mat2::operator*(float s) const {
+	Mat2 prod;
+	for (int l = 0; l < 2; l++) {
+		for (int c = 0; c < 2; c++) {
+			prod.m[l][c] = m[l][c] * s;
+		}
+	}
+	return prod;
+}
+
+Mat2 Mat2::operator+(float s) const {
+	Mat2 sum;
+	for (int l = 0; l < 2; l++) {
+		for (int c = 0; c < 2; c++) {
+			sum.m[l][c] = m[l][c] + s;
+		}
+	}
+	return sum;
+}
+
+Mat2 operator+(float s, const Mat2& mat2) {
+	Mat2 sum;
+	for (int l = 0; l < 2; l++) {
+		for (int c = 0; c < 2; c++) {
+			sum.m[l][c] = s + mat2.m[l][c];
+		}
+	}
+	return sum;
+}
+
+Mat2 Mat2::operator-(float s) const {
+	Mat2 diff;
+	for (int l = 0; l < 2; l++) {
+		for (int c = 0; c < 2; c++) {
+			diff.m[l][c] = m[l][c] - s;
+		}
+	}
+	return diff;
+}
+
+Mat2 operator-(float s, const Mat2& mat2) {
+	Mat2 diff;
+	for (int l = 0; l < 2; l++) {
+		for (int c = 0; c < 2; c++) {
+			diff.m[l][c] = s - mat2.m[l][c];
+		}
+	}
+	return diff;
+}
+
+Mat2 Mat2::operator/(float s) const {
+	Mat2 divid;
+	for (int l = 0; l < 2; l++) {
+		for (int c = 0; c < 2; c++) {
+			divid.m[l][c] = m[l][c] / s;
+		}
+	}
+	return divid;
+}
+
+Mat2 operator*(float s, const Mat2& mat2) {
+	Mat2 prod;
+	for (int l = 0; l < 2; l++) {
+		for (int c = 0; c < 2; c++) {
+			prod.m[l][c] = mat2.m[l][c] * s;
+		}
+	}
+	return prod;
+}
+
+Vec2 Mat2::operator*(const Vec2& v) const {
+	Vec2 prod;
+	prod.x = m[0][0] * v.x + m[0][1] * v.y;
+	prod.y = m[1][0] * v.x + m[1][1] * v.y;
+	return prod;
+}
+
+float* Mat2::operator[](int lines) {
+	return m[lines];
+}
+
+Mat2 Mat2::Transpose() const {
+	Mat2 trans;
+	for (int l = 0; l < 2; l++) {
+		for (int c = 0; c < 2; c++) {
+			trans.m[l][c] = m[c][l];
+		}
+	}
+	return trans;
+}
+
+bool Mat2::Inverse(Mat2& inverse) const {
+    const float det = Determinant();
+
+	if (Cmpf(det, 0.0f))
+		return false;
+
+	inverse = (1.0f / det) * Mat2(m[1][1], -m[0][1],
+								  -m[1][0], m[0][0]);
+	return true;
+}
+
+float Mat2::Determinant() const {
+	return m[0][0] * m[1][1] - m[0][1] * m[1][0];
+}
+
+void Mat2::ToOpenGLFormat(float array[4]) const {
+	int i = 0;
+	for (int c = 0; c < 2; c++) {
+		for (int l = 0; l < 2; l++) {
+			array[i] = m[l][c];
+			++i;
+		}
+	}
+}
+
+bool Mat2::IsOrthogonal() const {
+	return *this * this->Transpose() == IDENTITY;
+}
+
+std::ostream& operator<<(std::ostream& os, const Mat2& mat2) {
+	for (int l = 0; l < 2; l++) {
+		os << "[ ";
+		for (int c = 0; c < 2; c++) {
+			os << mat2.m[l][c];
+			if (c < 1) {
+				os << " , ";
+			}
+		}
+		os << " ]" << std::endl;
+	}
+	return os;
+}
+
+std::istream& operator>>(std::istream& is, Mat2& mat2) {
+	for (int l = 0; l < 2; l++) {
+		for (int c = 0; c < 2; c++) {
+			is >> mat2.m[l][c];
+		}
+	}
+	return is;
+}

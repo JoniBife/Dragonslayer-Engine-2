@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+    <Type Name="LinearAllocator">
+        <DisplayString>{{ used={topAddress - baseAddress} / {totalMemory} bytes }}</DisplayString>
+        <Expand>
+            <Item Name="[used]">topAddress - baseAddress</Item>
+            <Item Name="[free]">totalMemory - (size_t)(topAddress - baseAddress)</Item>
+            <Item Name="[total]">totalMemory</Item>
+            <Item Name="[ownsMemory]">ownsMemory</Item>
+
+            <Synthetic Name="[addresses]">
+                <Expand>
+                    <Item Name="base">baseAddress</Item>
+                    <Item Name="top">topAddress</Item>
+                    <Item Name="limit">baseAddress + totalMemory</Item>
+                </Expand>
+            </Synthetic>
+        </Expand>
+    </Type>
+
+    <!-- TODO Add Freelist allocator -->
+
+</AutoVisualizer>

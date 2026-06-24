@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+    <Type Name="FixedComponentPool">
+        <DisplayString>{{ active={activeComponents} / {maxComponents} }}</DisplayString>
+        <Expand>
+            <Item Name="[active]" ExcludeView="simple">activeComponents</Item>
+            <Item Name="[max]" ExcludeView="simple">maxComponents</Item>
+            <Item Name="[componentEntityPairSize]" ExcludeView="simple">componentEntityPairSize</Item>
+
+            <CustomListItems>
+                <Variable Name="i" InitialValue="0" />
+                <Variable Name="currentPair" InitialValue="componentEntityPairs" />
+
+                <Size>activeComponents</Size>
+
+                <Loop>
+                    <Break Condition="i == activeComponents" />
+
+                    <Item Name="[Entity {*(Entity*)(currentPair + entityOffset)}]">(void*)currentPair</Item>
+
+                    <Exec>i++</Exec>
+                    <Exec>currentPair += componentEntityPairSize</Exec>
+                </Loop>
+            </CustomListItems>
+        </Expand>
+    </Type>
+
+</AutoVisualizer>

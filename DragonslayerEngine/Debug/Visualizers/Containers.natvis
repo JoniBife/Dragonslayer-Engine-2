@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+    <Type Name="Array&lt;*,*&gt;">
+        <DisplayString>{{ size={size} }}</DisplayString>
+        <Expand>
+            <Item Name="[size]" ExcludeView="simple">size</Item>
+            <Item Name="[capacity]" ExcludeView="simple">capacity</Item>
+            <Item Name="[allocator]" ExcludeView="simple">allocator</Item>
+            <IndexListItems>
+                <Size>size</Size>
+                <ValueNode Condition="elements != 0">elements[$i]</ValueNode>
+            </IndexListItems>
+        </Expand>
+    </Type>
+
+    <Type Name="InlineArray&lt;*,*&gt;">
+        <DisplayString>{{ size={size} }}</DisplayString>
+        <Expand>
+            <ExpandedItem>(Array&lt;$T1, InlineLinearAllocator&lt;sizeof($T1)*$T2,alignof($T1)&gt; &gt;*)this</ExpandedItem>
+        </Expand>
+    </Type>
+
+    <Type Name="HashMap&lt;*&gt;">
+        <DisplayString>{{ size={size} }}</DisplayString>
+        <Expand>
+            <Item Name="[size]" ExcludeView="simple">size</Item>
+            <Item Name="[capacity]" ExcludeView="simple">capacity</Item>
+            <Item Name="[allocator]" ExcludeView="simple">allocator</Item>
+
+            <Item Name="[loadFactor]" ExcludeView="simple">(float)size / (float)capacity</Item>
+
+            <CustomListItems>
+                <Variable Name="i" InitialValue="0" />
+                <Variable Name="offset" InitialValue="0" />
+                <Variable Name="bucketOffset" InitialValue="sizeof(KeyValuePair) + paddingAfterPair" />
+
+                <Size>size</Size>
+
+                <If Condition="data != 0">
+                    <Loop>
+                        <Break Condition="i == capacity" />
+
+                        <If Condition="((Bucket*)(data + offset + bucketOffset))-&gt;occupied">
+                            <Item Name="[{((KeyValuePair*)(data + offset))-&gt;key}]">((KeyValuePair*)(data + offset))-&gt;value</Item>
+                        </If>
+
+                        <Exec>i++</Exec>
+                        <Exec>offset += stride</Exec>
+                    </Loop>
+                </If>
+            </CustomListItems>
+        </Expand>
+    </Type>
+
+</AutoVisualizer>

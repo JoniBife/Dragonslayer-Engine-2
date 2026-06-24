@@ -1,0 +1,6 @@
+
+[earlydepthstencil]
+void main()
+{
+
+}

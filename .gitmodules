@@ -1,0 +1,16 @@
+[submodule "DragonslayerEngine/Engine/libs/glfw"]
+	path = DragonslayerEngine/Engine/libs/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "DragonslayerEngine/Engine/libs/NRI"]
+	path = DragonslayerEngine/Engine/libs/NRI
+	url = https://github.com/NVIDIA-RTX/NRI.git
+[submodule "DragonslayerEngine/Engine/libs/imgui"]
+	path = DragonslayerEngine/Engine/libs/imgui
+	url = https://github.com/ocornut/imgui.git
+	branch = docking
+[submodule "DragonslayerEngine/Engine/libs/imguizmo"]
+	path = DragonslayerEngine/Engine/libs/imguizmo
+	url = https://github.com/CedricGuillemet/ImGuizmo.git
+[submodule "DragonslayerEngine/Engine/libs/ShaderMake"]
+	path = DragonslayerEngine/Engine/libs/ShaderMake
+	url = https://github.com/NVIDIA-RTX/ShaderMake.git
