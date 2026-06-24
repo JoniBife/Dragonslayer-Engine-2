@@ -26,7 +26,7 @@ void TimeCapturesManager::AddCapture(const NameString& name, float duration) {
 
     ASSERT(gThreadContext, "Function does not support untracked threads!");
 
-    if (duration > 20.f) {
+    if (duration > 100.f) {
         Log::Warning("[PERF][SPIKE] " + LogString(name) + " took " + LogString(duration) + " ms!");
     }
 

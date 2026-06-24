@@ -154,6 +154,12 @@ add_subdirectory("libs/NRI")
 # PhysX build flavor (matches the PhysX docs: debug / checked / profile / release).
 # Default checked: optimized + asserts on, recommended for development.
 set(PHYSX_BUILD_TYPE "checked" CACHE STRING "PhysX build type")
+
+# On debug builds it must be set to "debug"
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(PHYSX_BUILD_TYPE "debug")
+endif()
+
 set_property(CACHE PHYSX_BUILD_TYPE PROPERTY STRINGS debug checked profile release)
 
 if(DS_WINDOWS)
