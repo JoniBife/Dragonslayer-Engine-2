@@ -1,13 +1,13 @@
 # Dragonslayer Engine 2
 
-A C++ game engine, currently in development. The spiritual successor to [Dragonslayer Engine](https://github.com/JoniBife/DragonslayerEngine). The previous iteration was mostly focused on building a renderer with lots of features, not really meant to build games.
+A data-driven C++ game engine, currently in development. The spiritual successor to [Dragonslayer Engine](https://github.com/JoniBife/DragonslayerEngine). The previous iteration was mostly focused on building a renderer with lots of features, not really meant to build games.
 This one aims to be a fully fledged game engine, with a focus on performance and ease of use. Here are some of its current features:
 
-- Multi-threaded by default
+- Multi-threaded by default (system's callbacks are always running on multiple threads)
 - Custom Hierarchical Memory Manager with lots of custom allocators (mainly Linear, Freelist and Stack)
 - Hot-reloading (only on Windows for now)
 - An ECS
-- A GPU driven renderer
+- A GPU-driven renderer
 - PhysX integration
 - A simple editor
 - Minimal STD use (only features that require compiler support)

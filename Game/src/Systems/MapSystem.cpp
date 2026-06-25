@@ -37,7 +37,7 @@ void MapSystem::Update(ThreadContext& threadContext, Vault& vault) {
         return;
     }
 
-    if (Input::IsKeyPressed(KeyCode::J)) {
+    if (Input::IsKeyPressed(KeyCode::H)) {
 
         {
             Entity cube = vault.CreateEntity("Cube");
