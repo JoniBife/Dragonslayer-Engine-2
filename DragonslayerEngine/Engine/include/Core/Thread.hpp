@@ -14,7 +14,7 @@ using Thread = UnixThread;
 #endif
 
 // User thread entry point. Receives the user-data pointer passed at construction.
-using ThreadEntry = void(*)(Thread& thread);
+using ThreadEntryFunc = void(*)(Thread& thread);
 
 #if DS_PLATFORM_WINDOWS
 
@@ -26,12 +26,12 @@ class WinThread : public NotCopyable {
 private:
     HANDLE handle = INVALID_HANDLE_VALUE;
     DWORD id = 0;
-    ThreadEntry function = nullptr;
+    ThreadEntryFunc entryFunc = nullptr;
     void* userData = nullptr;
     bool joined = false;
 
 public:
-    WinThread(ThreadEntry function, void* userData) : function(function), userData(userData) {
+    WinThread(ThreadEntryFunc entryFunc, void* userData) : entryFunc(entryFunc), userData(userData) {
         handle = CreateThread(
             nullptr,
             0, /*Default stack size used by the executable*/
@@ -83,7 +83,7 @@ public:
 private:
     static DWORD WINAPI Trampoline(LPVOID data) {
         auto* thread = static_cast<WinThread*>(data);
-        thread->function(*thread);
+        thread->entryFunc(*thread);
         return 0;
     }
 };
@@ -98,13 +98,13 @@ class UnixThread : public NotCopyable {
 
 private:
     pthread_t handle = 0;
-    ThreadEntry function = nullptr;
+    ThreadEntryFunc entryFunc = nullptr;
     void* userData = nullptr;
     bool joined = false;
 
 public:
-    UnixThread(ThreadEntry function, void* userData)
-        : function(function), userData(userData) {
+    UnixThread(ThreadEntryFunc entryFunc, void* userData)
+        : entryFunc(entryFunc), userData(userData) {
         const int result = pthread_create(
             &handle,
             nullptr,
@@ -152,7 +152,7 @@ public:
 private:
     static void* Trampoline(void* data) {
         auto* thread = static_cast<UnixThread*>(data);
-        thread->function(*thread);
+        thread->entryFunc(*thread);
         return nullptr;
     }
 };

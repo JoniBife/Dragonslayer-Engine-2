@@ -5,7 +5,7 @@ This one aims to be a fully fledged game engine, with a focus on performance and
 
 - Multi-threaded by default
 - Custom Hierarchical Memory Manager with lots of custom allocators (mainly Linear, Freelist and Stack)
-- Hot-reloading
+- Hot-reloading (only on Windows for now)
 - An ECS
 - A GPU driven renderer
 - PhysX integration

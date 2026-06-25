@@ -38,9 +38,11 @@ void MemoryUsageSystem::Update(ThreadContext& threadContext, Vault& vault)
         const size_t usedMemory = gGlobalAllocator->GetUsedMemory();
         const size_t freeMemory = gGlobalAllocator->GetFreeMemory();
 
-        const size_t totalTempMemory = gThreadTempAllocator->GetTotalMemory();
-        const size_t usedTempMemory = gThreadTempAllocator->GetUsedMemory();
-        const size_t freeTempMemory = gThreadTempAllocator->GetFreeMemory();
+        StackAllocator& threadTempAllocator = GetThreadTempAllocator();
+
+        const size_t totalTempMemory = threadTempAllocator.GetTotalMemory();
+        const size_t usedTempMemory = threadTempAllocator.GetUsedMemory();
+        const size_t freeTempMemory = threadTempAllocator.GetFreeMemory();
 
         const size_t dividend = inMB ? 1024 * 1024 : 1024;
 

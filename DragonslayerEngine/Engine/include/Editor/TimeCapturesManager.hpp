@@ -57,8 +57,7 @@ public:
     NO_DISCARD float GetSmoothingFactor() const;
 
     FORCE_INLINE void SortThreadCaptures() {
-        ASSERT(gThreadContext, "Function does not support untracked threads!");
-        capturesPerThread[gThreadContext->index].Sort([](const TimeCapture& a, const TimeCapture& b) {
+        capturesPerThread[GetThreadContext().index].Sort([](const TimeCapture& a, const TimeCapture& b) {
             return a > b;
         });
     }

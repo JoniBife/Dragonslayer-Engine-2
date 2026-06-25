@@ -75,7 +75,7 @@ void Log::AddLogEntry(LogType type, const LogString& text) {
         instance->logEntries.RemoveAt(0);
     }
 
-    const int64 threadIndex = gThreadContext ? gThreadContext->index : -1;
+    const int64 threadIndex = HasThreadContext() ? GetThreadContext().index : -1;
     instance->frameLogEntries.Emplace(text, type, threadIndex);
     instance->logEntries.Emplace(text, type, threadIndex);
     instance->mutex.unlock();

@@ -8,15 +8,31 @@
 #include <Runtime/Input.hpp>
 
 void MapSystem::Start(ThreadContext& threadContext, Vault& vault) {
+
     if (!threadContext.IsMainThread()) {
         return;
     }
 
-
     Physics::CreatePhysicsMaterial("DebugCubeMaterial", 1.f, 1.f, 0.f);
+
+    const Entity plane = vault.CreateEntity("Plane");
+
+    Transform& transform = vault.EmplaceComponent<Transform>(plane);
+    transform.scale = Vec3(1000.f);
+
+    PrimitiveRenderer& primitiveRenderer = vault.EmplaceComponent<PrimitiveRenderer>(plane);
+    primitiveRenderer.color = Vec3(.9f);
+    primitiveRenderer.primitiveType = PrimitiveType::Plane;
+    primitiveRenderer.castShadow = false;
+
+    const PxMaterial& material = Physics::CreatePhysicsMaterial("GroundPlaneMaterial", 1.f, 1.f, 0.1f);
+    StaticRigidBody& staticRigidBody = vault.EmplaceComponent<StaticRigidBody>(plane);
+    staticRigidBody.AddExclusiveShape(PxPlaneGeometry(), material);
+    staticRigidBody.SetCollisionGroup(1 << 5, 0xFFFFFFFF);
 }
 
 void MapSystem::Update(ThreadContext& threadContext, Vault& vault) {
+
     if (!threadContext.IsMainThread()) {
         return;
     }

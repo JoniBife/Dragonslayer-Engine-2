@@ -15,11 +15,15 @@ extern ENGINE_API class FreeListAllocator* gGlobalAllocator;
 // The allocator dedicated to the active game
 extern ENGINE_API FreeListAllocator* gGameAllocator;
 
+// Using accessors because thread_local is not compatible with dllexport
+
 // Per-thread temp allocator, this allocator gets cleared every frame
-extern thread_local class StackAllocator* gThreadTempAllocator;
+ENGINE_API class StackAllocator& GetThreadTempAllocator();
 
 // The context of the current thread
-extern thread_local struct ThreadContext* gThreadContext;
+ENGINE_API struct ThreadContext& GetThreadContext();
+ENGINE_API void SetThreadContext(struct ThreadContext* context);
+ENGINE_API bool HasThreadContext();
 
 // Total of threads explicitly created by the engine
 extern ENGINE_API uint32 gNumThreads;

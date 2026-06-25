@@ -82,7 +82,7 @@ Engine::~Engine() {
     gGlobalAllocator->Free(&GetEngineSystem<PhysicsSystem>());
 }
 
-void Engine::SetRegisterGameSystemProc(const RegisterGameSystemsProc& newRegisterGameSystemsProc) {
+void Engine::SetRegisterGameSystemProc(const RegisterGameSystemsFunc& newRegisterGameSystemsProc) {
     this->registerGameSystemsProc = newRegisterGameSystemsProc;
 }
 
@@ -328,7 +328,7 @@ bool Engine::Update(ThreadContext& threadContext) {
     GetEngineSystem<LogSystem>().Update(threadContext, currentVault);
     threadContext.Sync();
 
-    gThreadContext->tempAllocator.Clear();
+    GetThreadTempAllocator().Clear();
 
     return true;
 }

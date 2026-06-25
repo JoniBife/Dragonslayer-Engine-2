@@ -1,5 +1,5 @@
 #include <iostream>
-#include <Runtime/Engine.hpp>
+
 #include "EngineSetup.hpp"
 
 #if DS_PLATFORM_WINDOWS
@@ -13,7 +13,7 @@
 
 #if WITH_EDITOR
 #include "Editor/ImGuiState.hpp"
-using SetImGuiStateProc = void (*)(const ImGui::State&);
+using SetImGuiStateFunc = void (*)(const ImGui::State&);
 #endif
 
 /* TODO The whole hot reloading logic should not exists in the shipped build
@@ -33,9 +33,9 @@ struct GameEntryPoint {
     struct timespec lastWriteTime = {};  // Last modification time
 #endif
 
-    Engine::RegisterGameSystemsProc startGameProc = nullptr; // The game's entry point
+    Engine::RegisterGameSystemsFunc registerGameSystemsFunc = nullptr; // The game's entry point
 #if WITH_EDITOR
-    SetImGuiStateProc setImGuiStateProc = nullptr;
+    SetImGuiStateFunc setImGuiStateFunc = nullptr;
 #endif
 
 };
@@ -95,22 +95,22 @@ static bool WinLoadGameEntryPoint(GameEntryPoint& gameEntryPoint) {
     }
     gameEntryPoint.handle = gameLib;
 
-    Engine::RegisterGameSystemsProc startGameProc = reinterpret_cast<Engine::RegisterGameSystemsProc>(GetProcAddress(gameLib, "RegisterSystems"));
+    Engine::RegisterGameSystemsFunc startGameProc = reinterpret_cast<Engine::RegisterGameSystemsFunc>(GetProcAddress(gameLib, "RegisterSystems"));
     if (!startGameProc) {
         DWORD err = GetLastError();
         std::cerr << "[HotReload] GetProcAddress failed for RegisterSystems with error: " << err << std::endl;
         return false;
     }
-    gameEntryPoint.startGameProc = startGameProc;
+    gameEntryPoint.registerGameSystemsFunc = startGameProc;
 
 #if WITH_EDITOR
-    SetImGuiStateProc setImGuiStateProc = reinterpret_cast<SetImGuiStateProc>(GetProcAddress(gameLib, "SetImGuiState"));
+    SetImGuiStateFunc setImGuiStateProc = reinterpret_cast<SetImGuiStateFunc>(GetProcAddress(gameLib, "SetImGuiState"));
     if (!setImGuiStateProc) {
         DWORD err = GetLastError();
         std::cerr << "[HotReload] GetProcAddress failed for SetImGuiState with error: " << err << std::endl;
         return false;
     }
-    gameEntryPoint.setImGuiStateProc = setImGuiStateProc;
+    gameEntryPoint.setImGuiStateFunc = setImGuiStateProc;
 #endif
 
     return true;
@@ -208,7 +208,7 @@ bool WinLoadGameEntryPoint(GameEntryPoint& gameEntryPoint) {
         std::cerr << "GetProcAddress failed with error: " << err << std::endl;
         return false;
     }
-    gameEntryPoint.startGameProc = startGameProc;
+    gameEntryPoint.registerGameSystemsFunc = startGameProc;
 
     return true;
 }
@@ -288,11 +288,56 @@ static void CleanupHotReloadDir() {
     }
 }
 
+static GameEntryPoint gameEntryPoint;
+#if WITH_EDITOR
+static ImGui::State imGuiState;
+#endif
+
+static void EngineLoop(Engine& engine, ThreadContext& threadContext) {
+
+#if WITH_EDITOR
+    // ImGui's context is created during engine.Start() (which has already run by
+    // the time we get here), so this is the earliest point we can capture a valid
+    // context + allocator funcs and hand them to the Game DLL. Doing it any earlier
+    // captures a null context and crashes the game's ImGui on Play.
+    if (threadContext.IsMainThread()) {
+        ImGui::GetState(imGuiState);
+        gameEntryPoint.setImGuiStateFunc(imGuiState);
+    }
+    threadContext.Sync();
+#endif
+
+    while (engine.Update(threadContext)) {
+
+        if (threadContext.IsMainThread()) {
+            FILETIME newWriteTime = {};
+            if (WinShouldReloadGameEntryPoint(gameEntryPoint, newWriteTime)) {
+
+                Log::Info("[HotReload] HotReload triggered, attempting to load new Game.dll...");
+
+                if (!WinLoadGameEntryPoint(gameEntryPoint)) {
+                    Log::Error("[HotReload] Failed to reload Game.dll. Retrying...");
+                    continue;
+                }
+
+                Log::Info("[HotReload] HotReload was successful!");
+
+                gameEntryPoint.lastWriteTime = newWriteTime;
+
+#if WITH_EDITOR
+                gameEntryPoint.setImGuiStateFunc(imGuiState);
+#endif
+                engine.SetRegisterGameSystemProc(gameEntryPoint.registerGameSystemsFunc);
+            }
+        }
+        threadContext.Sync();
+    }
+    threadContext.Sync();
+}
+
 int main(int argc, char *argv[]) {
 
     CleanupHotReloadDir();
-
-    GameEntryPoint gameEntryPoint;
 
     if (!WinLoadGameEntryPoint(gameEntryPoint)) {
         std::cerr << "[HotReload] Initial load failed." << std::endl;
@@ -301,41 +346,5 @@ int main(int argc, char *argv[]) {
 
     WinUpdateWriteTimeGameEntryPoint(gameEntryPoint);
 
-    Engine engine = SetupEngine(argc, argv);
-
-#if WITH_EDITOR
-    ImGui::State imGuiState{};
-    ImGui::GetState(imGuiState);
-    gameEntryPoint.setImGuiStateProc(imGuiState);
-#endif
-
-    engine.SetRegisterGameSystemProc(gameEntryPoint.startGameProc);
-    engine.Start();
-
-    while (engine.Update(0)) {
-
-        FILETIME newWriteTime = {};
-        if (WinShouldReloadGameEntryPoint(gameEntryPoint, newWriteTime)) {
-
-            Log::Info("[HotReload] HotReload triggered, attempting to load new Game.dll...");
-
-            if (!WinLoadGameEntryPoint(gameEntryPoint)) {
-                Log::Error("[HotReload] Failed to reload Game.dll. Retrying...");
-                continue;
-            }
-
-            Log::Info("[HotReload] HotReload was successful!");
-
-            gameEntryPoint.lastWriteTime = newWriteTime;
-
-#if WITH_EDITOR
-            gameEntryPoint.setImGuiStateProc(imGuiState);
-#endif
-            engine.SetRegisterGameSystemProc(gameEntryPoint.startGameProc);
-        }
-    }
-
-    engine.End();
-
-    return 0;
+    RunEngine(argc, argv, gameEntryPoint.registerGameSystemsFunc, EngineLoop);
 }

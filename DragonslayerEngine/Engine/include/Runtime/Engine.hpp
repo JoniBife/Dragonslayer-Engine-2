@@ -49,7 +49,7 @@ struct ENGINE_API EngineSettings {
 class ENGINE_API Engine final : public NotCopyable {
 
 public:
-    using RegisterGameSystemsProc = void(*)(Engine&);
+    using RegisterGameSystemsFunc = void(*)(Engine&);
 
 private:
     EngineSettings settings;
@@ -79,7 +79,7 @@ private:
 
     Log log;
 
-    RegisterGameSystemsProc registerGameSystemsProc = nullptr;
+    RegisterGameSystemsFunc registerGameSystemsProc = nullptr;
 
     bool startedGame = false;
     bool endedGame = false;
@@ -89,7 +89,7 @@ public:
     explicit Engine(const EngineSettings& settings);
     ~Engine();
 
-    void SetRegisterGameSystemProc(const RegisterGameSystemsProc& newRegisterGameSystemsProc);
+    void SetRegisterGameSystemProc(const RegisterGameSystemsFunc& newRegisterGameSystemsProc);
 
     template<typename SystemType, typename... Args>
     void AddGameSystem(Args&&... args) {

@@ -1,14 +1,44 @@
 #pragma once
 
+#include <Runtime/Engine.hpp>
+#include <Editor/TimeScope.hpp>
+#include <Core/Thread.hpp>
+#include <Core/ThreadContext.hpp>
+
 #if NRI_ENABLE_AGILITY_SDK_SUPPORT
 #include "NRIAgilitySDK.h" // This MUST be included here in order for the agility SDK to work
 #endif
 
-#include <Editor/TimeScope.hpp>
+using EngineLoopFunc = void(*)(Engine& engine, ThreadContext& threadContext);
 
-#include "Runtime/Engine.hpp"
+struct ThreadParameters {
+    Engine& engine;
+    ThreadContext threadContext;
+    EngineLoopFunc engineLoopFunc;
+};
 
-NO_DISCARD FORCE_INLINE static EngineSettings GetEngineSettingsFromArgs(int argc, char *argv[]) {
+void RunEngineLoop(Engine& engine, ThreadContext& threadContext, const EngineLoopFunc engineLoopFunc) {
+    engine.Start(threadContext);
+    threadContext.Sync();
+
+    engineLoopFunc(engine, threadContext);
+    threadContext.Sync(); // Potentially redundant
+
+    engine.End(threadContext);
+    threadContext.Sync();
+}
+
+void ThreadEntryPoint(Thread& thread) {
+    ThreadParameters& threadData = thread.GetUserData<ThreadParameters>();
+    SetThreadContext(&threadData.threadContext);
+    RunEngineLoop(threadData.engine, threadData.threadContext, threadData.engineLoopFunc);
+}
+
+FORCE_INLINE void RunEngine(
+    int argc,
+    char *argv[],
+    const Engine::RegisterGameSystemsFunc registerGameSystemsFunc,
+    const EngineLoopFunc engineLoopFunc) {
 
     nri::GraphicsAPI api = nri::GraphicsAPI::D3D12;
 
@@ -19,7 +49,7 @@ NO_DISCARD FORCE_INLINE static EngineSettings GetEngineSettingsFromArgs(int argc
         }
     }
 
-    return {
+    const EngineSettings engineSettings = {
         .maxMemory = Gb(3),
         .maxGameMemory = Mb(256),
         .maxMemoryPerThread = Mb(8),
@@ -57,5 +87,72 @@ NO_DISCARD FORCE_INLINE static EngineSettings GetEngineSettingsFromArgs(int argc
             .enablePhysicsVisualDebugger = false
         }
     };
+
+    FreeListAllocator globalAllocator(engineSettings.maxMemory);
+    gGlobalAllocator = &globalAllocator;
+    gGameAllocator = gGlobalAllocator->Allocate<FreeListAllocator>(*gGlobalAllocator, engineSettings.maxGameMemory);
+    // Main-thread temp allocator
+    StackAllocator* mainTempAllocator = gGlobalAllocator->Allocate<StackAllocator>(*gGlobalAllocator, engineSettings.maxTempMemoryPerThread);
+
+    gNumThreads = engineSettings.maxThreads;
+
+    Barrier barrier(static_cast<int64>(engineSettings.maxThreads));
+
+#if WITH_EDITOR
+    // Shared across all threads; each thread's Sync() stamps its own slot to validate barrier alignment.
+    Array<SyncSite, FreeListAllocator> syncSites = Array<SyncSite, FreeListAllocator>(engineSettings.maxThreads, gGlobalAllocator);
+    syncSites.EmplaceMany(engineSettings.maxThreads);
+#endif
+
+    ThreadContext mainThreadContext = {
+        .allocator = *gGlobalAllocator,
+        .tempAllocator = *mainTempAllocator,
+        .barrier = barrier,
+#if WITH_EDITOR
+        .syncSites = syncSites,
+#endif
+        .broadcastMemory = nullptr, // TODO Decide what to pass here as default
+        .count = static_cast<uint32>(engineSettings.maxThreads),
+        .index = 0
+    };
+    SetThreadContext(&mainThreadContext);
+
+    Engine engine(engineSettings);
+
+    engine.SetRegisterGameSystemProc(registerGameSystemsFunc);
+
+    Array<Thread*, FreeListAllocator> threads = Array<Thread*, FreeListAllocator>(engineSettings.maxThreads, gGlobalAllocator);
+
+    // Loop starts at 1 to exclude the main thread
+    for (uint32 i = 1; i < engineSettings.maxThreads; ++i) {
+
+        FreeListAllocator* threadAllocator = gGlobalAllocator->Allocate<FreeListAllocator>(*gGlobalAllocator, engineSettings.maxMemoryPerThread);
+        StackAllocator* threadTempAllocator = gGlobalAllocator->Allocate<StackAllocator>(*gGlobalAllocator, engineSettings.maxTempMemoryPerThread);
+
+        const ThreadContext threadContext = {
+            .allocator = *threadAllocator,
+            .tempAllocator = *threadTempAllocator,
+            .barrier = barrier,
+#if WITH_EDITOR
+            .syncSites = syncSites,
+#endif
+            .broadcastMemory = nullptr, // TODO Decide what to pass here as default
+            .count =  static_cast<uint32>(engineSettings.maxThreads),
+            .index = i
+        };
+
+        ThreadParameters* threadData = gGlobalAllocator->Allocate<ThreadParameters>(engine, threadContext, engineLoopFunc);
+
+        threads.Emplace(gGlobalAllocator->Allocate<Thread>(ThreadEntryPoint, threadData));
+    }
+
+    // Run engine on main thread as well!
+    RunEngineLoop(engine, mainThreadContext, engineLoopFunc);
+
+    // -1 to exclude the main thread
+    for (uint32 i = 0; i < engineSettings.maxThreads - 1; ++i) {
+        threads[i]->Join();
+        gGlobalAllocator->Free(threads[i]);
+    }
 }
 
