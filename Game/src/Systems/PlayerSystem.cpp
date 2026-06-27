@@ -155,7 +155,7 @@ void PlayerSystem::PrePhysicsUpdate(ThreadContext& threadContext, Vault& vault) 
     {
         constexpr float ROTATION_SPEED = 10.f;
         player.currentRotation += GetInputRotation() * ROTATION_SPEED * gTime.physicsDeltaTime;
-        player.currentRotation = std::fmodf(player.currentRotation, 360.f);
+        player.currentRotation = std::fmod(player.currentRotation, 360.f);
         characterRotation = Quat(-DegreesToRadians(player.currentRotation), Vec3::UP);
         const Vec3 forward = characterRotation.ToRotationMatrix() * Vec3::FORWARD;
         const Vec3 right = characterRotation.ToRotationMatrix() * Vec3::RIGHT;
@@ -169,8 +169,8 @@ void PlayerSystem::PrePhysicsUpdate(ThreadContext& threadContext, Vault& vault) 
         cameraRight = Vec3(cameraRight.x, 0.f, cameraRight.z).Normalize();
 
         movementDirection = (cameraForward * inputMovement.x + cameraRight * inputMovement.y).Normalize();
-        const float rotation = std::fmodf(std::atan2(cameraForward.x, cameraForward.z), 2.f * PI);
-        characterRotation = Quat(rotation, Vec3::UP);
+        const float rotationAngle = std::fmod(std::atan2(cameraForward.x, cameraForward.z), 2.f * PI);
+        characterRotation = Quat(rotationAngle, Vec3::UP);
     }
 
     rotation = characterRotation;

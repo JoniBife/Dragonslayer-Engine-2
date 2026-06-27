@@ -92,7 +92,7 @@ private:
 
 #if DS_PLATFORM_LINUX
 
-#include <pthread.h> // For pthread_create(), pthread_join()
+#include <pthread.h>
 
 class UnixThread : public NotCopyable {
 
