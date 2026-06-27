@@ -525,13 +525,14 @@ target_link_libraries (Engine
     PUBLIC
         glfw
         NRI
-        ${PhysXSharedLibs}
         Detex
         Imgui
         Imguizmo
         ShaderMakeBlob
     PRIVATE
         ${PhysXStaticLibs}
+    PUBLIC
+        ${PhysXSharedLibs}
 )
 
 add_dependencies(Engine Shaders)

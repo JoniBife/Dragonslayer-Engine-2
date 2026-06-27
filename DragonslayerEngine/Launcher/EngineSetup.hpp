@@ -50,7 +50,7 @@ FORCE_INLINE void RunEngine(
     }
 
     const EngineSettings engineSettings = {
-        .maxMemory = Gb(3),
+        .maxMemory = Gb(1),
         .maxGameMemory = Mb(256),
         .maxMemoryPerThread = Mb(8),
         .maxTempMemoryPerThread = Mb(16),
