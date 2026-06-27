@@ -334,7 +334,7 @@ static void UpdateHandleMotion(Vault& vault, bool inputMotion) {
             ? (swordHandle.swingTime / swordHandle.swingDuration)
             : 0.f;
 
-        const Quat swingRotation = Quat(std::sinf(swingProgress * PI) * PI, Vec3::UP);
+        const Quat swingRotation = Quat(std::sin(swingProgress * PI) * PI, Vec3::UP);
         const PxTransform swingTransform(ToPX(swingRotation));
 
         PxTransform localHandleTransform =
