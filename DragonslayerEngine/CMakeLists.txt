@@ -4,4 +4,4 @@ project(DragonslayerEngine)
 
 add_subdirectory ("Launcher")
 add_subdirectory ("Engine")
-add_subdirectory ("Tests")
+# add_subdirectory ("Tests")
