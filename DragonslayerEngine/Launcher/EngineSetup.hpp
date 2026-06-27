@@ -77,8 +77,13 @@ FORCE_INLINE void RunEngine(
             .usedMemory = Mb(32),
             .graphicsAPI = api,
             .enableVSync = true,
+#if DS_RELEASE_BUILD
+            .debugAPI = false,
+            .debugNRI = false
+#else
             .debugAPI = true,
             .debugNRI = true
+#endif
         },
 
         .physicsSettings = {

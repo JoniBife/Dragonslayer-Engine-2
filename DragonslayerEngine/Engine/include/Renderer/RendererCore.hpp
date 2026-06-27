@@ -101,15 +101,16 @@ struct Instance {
     uint32 meshID;
     uint32 materialID; // reserved for bindless material (always 0 for now)
     uint32 shaderID; // PSO bucket (0=opaque, 1=transparent, 2=shadow)
-    uint32 flags; // bit 0: castsShadow, bit 1: isOpaque, bit 2: isTransparent
+    uint32 flags; // bit 0: isVisible, bit 1: castsShadow, bit 2: isOpaque, bit 3: isTransparent
 };
 static_assert(sizeof(Instance) == 160, "Instance must be 160 bytes (must match HLSL StructuredBuffer<Instance>)");
 
 // Instance flag bits.
 namespace InstanceFlag {
-    constexpr uint32 CastsShadow = 1u << 0;
-    constexpr uint32 IsOpaque = 1u << 1;
-    constexpr uint32 IsTransparent = 1u << 2;
+    constexpr uint32 IsVisible = 1u << 0;
+    constexpr uint32 CastsShadow = 1u << 1;
+    constexpr uint32 IsOpaque = 1u << 2;
+    constexpr uint32 IsTransparent = 1u << 3;
 }
 
 // PSO bucket index, matches the per-pass PSO enum in RenderingSystem.cpp.

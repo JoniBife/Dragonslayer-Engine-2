@@ -244,7 +244,6 @@ static void SetupImGui(FreeListAllocator* allocator) {
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
-    const ImFont* customFont = io.Fonts->AddFontFromFileTTF("Assets/Editor/JetBrainsMono-SemiBold.ttf", 19.0f);
-    ASSERT(customFont != nullptr, "Failed to load editor font!");
+    io.Fonts->AddFontFromFileTTF("Assets/Editor/JetBrainsMono-SemiBold.ttf", 19.0f);
 }
 

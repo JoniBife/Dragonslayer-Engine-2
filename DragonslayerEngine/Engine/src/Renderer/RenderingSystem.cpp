@@ -1177,16 +1177,6 @@ static void OnMainMenu() {
 }
 #endif
 
-void RenderingSystem::CountInstances(Vault& vault) {
-    numInstances = 0;
-    for (auto& [primitiveRenderer, entity] : vault.GetComponents<PrimitiveRenderer>()) {
-        numInstances += static_cast<uint32>(primitiveRenderer.isVisible);
-    }
-    for (auto& [physicsNPC, entity] : vault.GetComponents<PhysicsNPC>()) {
-        numInstances += static_cast<uint32>(physicsNPC.primitiveRenderer.isVisible);
-    }
-}
-
 static Mat4 ComputeModelMatrix(const Transform& transform, const DynamicRigidBody* body, bool interpolate) {
     if (interpolate && body) {
         // Interpolate between last and current physics update since physics runs at a different frequency than the renderer
@@ -1298,17 +1288,13 @@ static void ComputeModelAndNormalMatrices(
     };
 }
 
-static bool CreateInstance(
+static void CreateInstance(
     const Transform& transform,
     const PrimitiveRenderer& renderer,
     const DynamicRigidBody* rigidBody,
     const CharacterController* characterController,
     const FrameContext& frameContext,
     Instance& instance) {
-
-    if (!renderer.isVisible) {
-        return false;
-    }
 
     Mat4 modelMatrix, normalMatrix;
     ComputeModelAndNormalMatrices(transform, rigidBody, characterController, modelMatrix, normalMatrix, frameContext.interpolate);
@@ -1325,90 +1311,118 @@ static bool CreateInstance(
         .flags = isOpaque ? InstanceFlag::IsOpaque : InstanceFlag::IsTransparent
     };
 
+    if (renderer.isVisible) {
+        instance.flags |= InstanceFlag::IsVisible;
+    }
+
     if (renderer.castShadow) {
         instance.flags |= InstanceFlag::CastsShadow;
     }
-
-    return true;
 }
 
-void RenderingSystem::CollectInstances(Vault& vault) {
+void RenderingSystem::CollectInstances(ThreadContext& threadContext, Vault& vault) {
 
     TIME_SCOPE("Renderer_CollectInstances");
 
-    instances.Reset();
+    static uint32 numPrimitiveRenderers = 0;
+    static uint32 numPhysicsNPCs = 0;
 
-    for (auto& [primitiveRenderer, entity] : vault.GetComponents<PrimitiveRenderer>()) {
+    if (threadContext.IsMainThread())
+    {
+        numPrimitiveRenderers = vault.GetNumberOfComponents<PrimitiveRenderer>();
+        numPhysicsNPCs = vault.GetNumberOfComponents<PhysicsNPC>();
 
-        if (instances.GetSize() > MAX_INSTANCES) {
-            break;
+        const uint32 numTotalInstances = numPrimitiveRenderers + numPhysicsNPCs;
+        const uint32 numExistingInstances = instances.GetSize();
+
+        ASSERT(numTotalInstances < MAX_INSTANCES);
+
+        const int32 diff = numTotalInstances - numExistingInstances;
+        if (diff > 0)
+        {
+            instances.EmplaceMany(diff);
         }
+        else
+        {
+            for (int32 i = diff; i < 0; ++i)
+            {
+                instances.RemoveLast();
+            }
+        }
+    }
+    threadContext.Sync();
 
-        Instance instance = {};
+    const Range primitiveRenderersRange = threadContext.UniformRange(numPrimitiveRenderers);
+    ContainerView<ComponentEntityPair<PrimitiveRenderer>> primitiveRenderers = vault.GetComponents<PrimitiveRenderer>();
+    for (uint32 i = primitiveRenderersRange.min; i < primitiveRenderersRange.max; i++) {
 
-        if (CreateInstance(
+        auto& [primitiveRenderer, entity] = primitiveRenderers[i];
+
+        CreateInstance(
             vault.GetComponent<Transform>(entity),
             primitiveRenderer,
             vault.TryGetComponent<DynamicRigidBody>(entity),
             vault.TryGetComponent<CharacterController>(entity),
             frameContext,
-            instance)) {
-
-            instances.Add(instance);
-        }
+            instances[i]
+        );
     }
 
-    for (auto& [physicsNPC, entity] : vault.GetComponents<PhysicsNPC>()) {
+    const Range physicsNPCsRange = threadContext.UniformRange(numPhysicsNPCs);
+    ContainerView<ComponentEntityPair<PhysicsNPC>> physicsNPCs = vault.GetComponents<PhysicsNPC>();
+    for (uint32 i = physicsNPCsRange.min; i < physicsNPCsRange.max; i++) {
 
-        if (instances.GetSize() > MAX_INSTANCES) {
-            break;
-        }
+        auto& [physicsNPC, entity] = physicsNPCs[i];
 
-        Instance instance = {};
-
-        if (CreateInstance(
+        CreateInstance(
             physicsNPC.transform,
             physicsNPC.primitiveRenderer,
             &physicsNPC.dynamicRigidBody,
             nullptr,
             frameContext,
-            instance)) {
+            instances[i + numPrimitiveRenderers]
+        );
+    }
+    threadContext.Sync();
 
-            instances.Add(instance);
+    if (threadContext.IsMainThread())
+    {
+        if (!useGpuDrawGeneration) {
+
+            TIME_SCOPE("Renderer_SortInstances");
+
+            // Sort by (shaderID, meshID) so the CPU draw path can merge consecutive same-mesh
+            // instances within a bucket into a single CmdDrawIndexed (instanceCount = N).
+            // GenerateDrawCommandsCS is order-agnostic; the GPU path is unaffected.
+            if (instances.GetSize() > 1) {
+                std::sort(instances.GetData(), instances.GetData() + instances.GetSize(),
+                    [](const Instance& a, const Instance& b) {
+                        if (a.shaderID != b.shaderID) return a.shaderID < b.shaderID;
+                        return a.meshID < b.meshID;
+                    });
+            }
+        }
+
+        // Stream the per-frame instance array into the game streamer's ring, with the persistent
+        // INSTANCE_BUFFER as the copy destination. CmdCopyStreamedData (issued in Update()) does
+        // the actual transfer on the GPU. The descriptor view (instancesView) points at
+        // INSTANCE_BUFFER, so it never has to be re-created across frames.
+        if (!instances.IsEmpty()) {
+            const nri::DataSize chunk = {instances.GetData(), instances.GetSize() * sizeof(Instance)};
+            const nri::StreamBufferDataDesc streamDesc = {
+                .dataChunks = &chunk,
+                .dataChunkNum = 1,
+                .placementAlignment = static_cast<uint32>(alignof(Instance)),
+                .dstBuffer = buffers[INSTANCE_BUFFER],
+                .dstOffset = 0,
+            };
+
+            instanceBufferOffset = NRI.StreamBufferData(*gameStreamer, streamDesc);
+        } else {
+            instanceBufferOffset = {};
         }
     }
-
-    if (!useGpuDrawGeneration) {
-        // Sort by (shaderID, meshID) so the CPU draw path can merge consecutive same-mesh
-        // instances within a bucket into a single CmdDrawIndexed (instanceCount = N).
-        // GenerateDrawCommandsCS is order-agnostic; the GPU path is unaffected.
-        if (instances.GetSize() > 1) {
-            std::sort(instances.GetData(), instances.GetData() + instances.GetSize(),
-                [](const Instance& a, const Instance& b) {
-                    if (a.shaderID != b.shaderID) return a.shaderID < b.shaderID;
-                    return a.meshID < b.meshID;
-                });
-        }
-    }
-
-    // Stream the per-frame instance array into the game streamer's ring, with the persistent
-    // INSTANCE_BUFFER as the copy destination. CmdCopyStreamedData (issued in Update()) does
-    // the actual transfer on the GPU. The descriptor view (instancesView) points at
-    // INSTANCE_BUFFER, so it never has to be re-created across frames.
-    if (!instances.IsEmpty()) {
-        const nri::DataSize chunk = {instances.GetData(), instances.GetSize() * sizeof(Instance)};
-        const nri::StreamBufferDataDesc streamDesc = {
-            .dataChunks = &chunk,
-            .dataChunkNum = 1,
-            .placementAlignment = static_cast<uint32>(alignof(Instance)),
-            .dstBuffer = buffers[INSTANCE_BUFFER],
-            .dstOffset = 0,
-        };
-
-        instanceBufferOffset = NRI.StreamBufferData(*gameStreamer, streamDesc);
-    } else {
-        instanceBufferOffset = {};
-    }
+    threadContext.Sync();
 }
 
 void RenderingSystem::UpdateConstantBuffer(uint32 queuedFrameIndex, const Camera* camera, float shadowProjectionSize) {
@@ -1570,7 +1584,7 @@ void RenderingSystem::BuildFrameGraph() {
         .Access(instanceBufferHandle, nri::AccessBits::COPY_DESTINATION, nri::StageBits::COPY)
         .Execute([this](nri::CommandBuffer& commandBuffer, const nri::RenderingDesc&) {
             // CollectInstances(); Currently not working
-            if (numInstances > 0) {
+            if (instances.GetSize() > 0) {
                 NRI.CmdCopyStreamedData(commandBuffer, *gameStreamer);
             }
         })
@@ -1642,7 +1656,9 @@ void RenderingSystem::BuildFrameGraph() {
 
 void RenderingSystem::RecordBuildDrawCommandsPass(nri::CommandBuffer& commandBuffer) {
 
-    if (instances.IsEmpty()) {
+    const uint32 numInstances = instances.GetSize();
+
+    if (numInstances == 0) {
         return; // drawCount was just cleared to zero; indirect draws will issue 0 draws
     }
 
@@ -1666,9 +1682,9 @@ void RenderingSystem::RecordBuildDrawCommandsPass(nri::CommandBuffer& commandBuf
         NRI.CmdDispatch(commandBuffer, {groups, 1, 1});
     };
 
-    // Opaque + Transparent buckets filter by inst.shaderID (passFlagMask = 0).
-    dispatchBucket(ShaderBucket::Opaque,      /*flagMask=*/0);
-    dispatchBucket(ShaderBucket::Transparent, /*flagMask=*/0);
+    // Opaque + Transparent buckets filter by inst.shaderID (passFlagMask = 1).
+    dispatchBucket(ShaderBucket::Opaque,      /*flagMask=*/InstanceFlag::IsVisible);
+    dispatchBucket(ShaderBucket::Transparent, /*flagMask=*/InstanceFlag::IsVisible);
     // Shadow bucket: instance.shaderID won't match Shadow; the GenerateDrawCommandsCS branch keys on
     // the non-zero flagMask to short-circuit the shaderID filter.
     dispatchBucket(ShaderBucket::Shadow,      /*flagMask=*/InstanceFlag::CastsShadow);
@@ -1835,7 +1851,7 @@ void RenderingSystem::SubmitFrame(
     }
 
     { // Signaling after "Present" improves D3D11 performance a bit
-        TIME_SCOPE(NameString("Renderer_Submit"));
+        TIME_SCOPE(NameString("Renderer_Signaling_Present"));
 
         nri::FenceSubmitDesc signalFence = {
             .fence = frameFence,
@@ -1952,10 +1968,6 @@ void RenderingSystem::Update(ThreadContext& threadContext, Vault& vault) {
         frameContext.constantBias = constantBias;
         frameContext.slopeBias = slopeBias;
 
-        // TODO This can and should be done in parallel!
-        CountInstances(vault);
-        CollectInstances(vault);
-
         // Host-side constant-buffer update — pure Map/memcpy/Unmap on a HOST_UPLOAD buffer, no
         // GPU commands. Must run before the graph executes so passes see this frame's view/proj.
         UpdateConstantBuffer(queuedFrameIndex, activeCamera, shadowProjectionSize);
@@ -1966,6 +1978,8 @@ void RenderingSystem::Update(ThreadContext& threadContext, Vault& vault) {
         frameGraph->SetImport(swapchainHandle, swapChainTexture->texture, swapchainViews);
     }
     threadContext.Sync();
+
+    CollectInstances(threadContext, vault);
 
     frameGraph->RecordPasses(threadContext, perThreadQueuedFrames, descriptorPool, frameContext.queuedFrameIndex, multihreadedRecording);
 

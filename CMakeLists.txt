@@ -55,6 +55,18 @@ else()
     endif()
 endif()
 
+
+# ----------------------------------------
+# Build Type Macros
+# ----------------------------------------
+
+add_compile_definitions(
+    $<$<CONFIG:Debug>:DS_DEBUG_BUILD=1>
+    $<$<CONFIG:Debug>:DS_RELEASE_BUILD=0>
+    $<$<CONFIG:Release>:DS_DEBUG_BUILD=0>
+    $<$<CONFIG:Release>:DS_RELEASE_BUILD=1>
+)
+
 # ----------------------------------------
 # Build directory
 # ----------------------------------------
@@ -70,7 +82,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${BUILD_OUTPUT_DIR}")
 # Hot-reload setup
 # ----------------------------------------
 
-option(DS_ENABLE_HOT_RELOADING "Enables Hot-reloading for Dragonslayer Engine" ON)
+option(DS_ENABLE_HOT_RELOADING "Enables Hot-reloading for Dragonslayer Engine" OFF)
 
 if(DS_ENABLE_HOT_RELOADING)
     message(STATUS "Hot-reloading enabled")

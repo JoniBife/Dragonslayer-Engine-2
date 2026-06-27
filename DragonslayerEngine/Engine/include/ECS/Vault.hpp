@@ -10,6 +10,7 @@
 #include "Core/Macros.hpp"
 #include "Core/NotCopyable.hpp"
 #include "Core/String.hpp"
+#include "Core/ThreadContext.hpp"
 #include "Core/TypeInfo.hpp"
 #include "Entity.hpp"
 
@@ -323,6 +324,15 @@ public:
         FixedComponentPool& componentPool = GetComponentPool(componentID);
         ComponentEntityPair<Component>* componentEntityPairs = reinterpret_cast<ComponentEntityPair<Component>*>(componentPool.GetComponentEntityPairs());
         return ContainerView<ComponentEntityPair<Component>>(componentEntityPairs, componentPool.GetNumComponentEntityPairs());
+    }
+
+    template<typename Component>
+    FORCE_INLINE auto GetComponents(ThreadContext& threadContext) {
+        constexpr ComponentID componentID = TypeHash<Component>();
+        FixedComponentPool& componentPool = GetComponentPool(componentID);
+        ComponentEntityPair<Component>* componentEntityPairs = reinterpret_cast<ComponentEntityPair<Component>*>(componentPool.GetComponentEntityPairs());
+        const Range componentsRange = threadContext.UniformRange(componentPool.GetNumComponentEntityPairs());
+        return ContainerView<ComponentEntityPair<Component>>(componentEntityPairs, componentsRange.min, componentsRange.max);
     }
 
     template<typename Component>

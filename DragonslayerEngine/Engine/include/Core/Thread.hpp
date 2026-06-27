@@ -136,7 +136,7 @@ public:
     }
 
     NO_DISCARD FORCE_INLINE uint64 GetID() const {
-        return static_cast<uint64>(handle);
+        return handle;
     }
 
     template<typename T>

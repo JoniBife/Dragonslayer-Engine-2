@@ -399,24 +399,14 @@ void PhysicsSystem::PostPhysicsUpdate(ThreadContext& threadContext, Vault& vault
         // as well as update previous transform so it can be used for smooth visual interpolation
         TIME_SCOPE(NameString("Physics_CopyTransform"));
 
-        const uint32 numStaticBodies = vault.GetNumberOfComponents<StaticRigidBody>();
-        const Range staticBodiesRange = threadContext.UniformRange(numStaticBodies);
-        auto staticRigidBodies = vault.GetComponents<StaticRigidBody>();
-
-        for (uint32 i = staticBodiesRange.min; i < staticBodiesRange.max; ++i) {
-            auto& [staticRigidBody, entity] = staticRigidBodies[i];
+        for (auto& [staticRigidBody, entity] : vault.GetComponents<StaticRigidBody>(threadContext)) {
             const PxTransform transformAfterPhysics = staticRigidBody.body->getGlobalPose();
             Transform& transform = vault.GetComponent<Transform>(entity);
             transform.location = ToDS(transformAfterPhysics.p);
             transform.rotation = ToDS(transformAfterPhysics.q);
         }
 
-        const uint32 numDynamicBodies = vault.GetNumberOfComponents<DynamicRigidBody>();
-        const Range rigidBodiesRange = threadContext.UniformRange(numDynamicBodies);
-        auto dynamicRigidBodies = vault.GetComponents<DynamicRigidBody>();
-
-        for (uint32 i = rigidBodiesRange.min; i < rigidBodiesRange.max; ++i) {
-            auto& [dynamicRigidBody, entity] = dynamicRigidBodies[i];
+        for (auto& [dynamicRigidBody, entity] : vault.GetComponents<DynamicRigidBody>(threadContext)) {
             const PxTransform transformAfterPhysics = dynamicRigidBody.body->getGlobalPose();
             Transform& transform = vault.GetComponent<Transform>(entity);
             dynamicRigidBody.positionLastPhysicsUpdate = transform.location;
@@ -425,12 +415,7 @@ void PhysicsSystem::PostPhysicsUpdate(ThreadContext& threadContext, Vault& vault
             transform.rotation = ToDS(transformAfterPhysics.q);
         }
 
-        const uint32 numPhysicsNPCs = vault.GetNumberOfComponents<PhysicsNPC>();
-        const Range physicsNPCsRange = threadContext.UniformRange(numPhysicsNPCs);
-        auto physicsNPCs = vault.GetComponents<PhysicsNPC>();
-
-        for (uint32 i = physicsNPCsRange.min; i < physicsNPCsRange.max; ++i) {
-            auto& [physicsNPC, entity] = physicsNPCs[i];
+        for (auto& [physicsNPC, entity] : vault.GetComponents<PhysicsNPC>(threadContext)) {
             const PxTransform transformAfterPhysics = physicsNPC.dynamicRigidBody.body->getGlobalPose();
             physicsNPC.dynamicRigidBody.positionLastPhysicsUpdate = physicsNPC.transform.location;
             physicsNPC.dynamicRigidBody.rotationLastPhysicsUpdate = physicsNPC.transform.rotation;

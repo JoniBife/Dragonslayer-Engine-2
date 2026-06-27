@@ -157,7 +157,7 @@ private:
     // FrameGraph pass records CmdCopyStreamedData which performs the actual copy.
     // BuildDrawsCS + bindless VS read INSTANCE_BUFFER's SRV (instancesView).
     Array<Instance, FreeListAllocator> instances;
-    uint32 numInstances = 0;
+    uint32 numInstancesTotal = 0;
 
     // GPU-driven draw generation
     nri::PipelineLayout* generateDrawCommandsLayout = nullptr;
@@ -221,8 +221,7 @@ private:
 
     void BuildFrameGraph();
 
-    void CountInstances(Vault& vault);
-    void CollectInstances(Vault& vault);
+    void CollectInstances(ThreadContext& threadContext, Vault& vault);
 
     void RecordBuildDrawCommandsPass(nri::CommandBuffer& commandBuffer);
     void RecordShadowPassBody(nri::CommandBuffer& commandBuffer);

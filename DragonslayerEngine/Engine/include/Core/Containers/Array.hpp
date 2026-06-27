@@ -223,7 +223,10 @@ public:
             return false;
         }
 
-        elements[index].~ElementType();
+        if constexpr (!std::is_trivially_destructible_v<ElementType>)
+        {
+            elements[index].~ElementType();
+        }
 
         --size;
 
@@ -263,7 +266,10 @@ public:
             return false;
         }
 
-        elements[index].~ElementType();
+        if constexpr (!std::is_trivially_destructible_v<ElementType>)
+        {
+            elements[index].~ElementType();
+        }
 
         --size;
 

@@ -23,6 +23,9 @@ public:
     ContainerView(ElementType* elements, size_t numElements) :
         elements(elements), numElements(numElements) {}
 
+    ContainerView(ElementType* elements, size_t rangeStart, size_t rangeEnd) :
+        elements(elements + rangeStart), numElements(rangeEnd - rangeStart) {}
+
     // --- Modern Random Access Iterator ---
     struct Iterator {
         using iterator_category = std::random_access_iterator_tag;
