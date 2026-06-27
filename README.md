@@ -1,5 +1,7 @@
 # Dragonslayer Engine 2
 
+[![Windows/Linux](https://github.com/JoniBife/Dragonslayer-Engine-2/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/JoniBife/Dragonslayer-Engine-2/actions/workflows/cmake-multi-platform.yml)
+
 A data-driven C++ game engine, currently in development. The spiritual successor to [Dragonslayer Engine](https://github.com/JoniBife/DragonslayerEngine). The previous iteration was mostly focused on building a renderer with lots of features, not really meant to build games.
 This one aims to be a fully fledged game engine, with a focus on performance and ease of use. Here are some of its current features:
 
