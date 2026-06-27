@@ -5,12 +5,8 @@
 #include "ECS/HierarchyDirectory.hpp"
 #endif
 
-#include <Editor/TimeScope.hpp>
-
-
+#include "Editor/TimeScope.hpp"
 #include "Core/Log.hpp"
-
-
 #include "Core/Containers/ArrayHelper.hpp"
 
 InlineArray<ComponentConstructionData, MAX_COMPONENT_TYPES>& GetComponentsConstructionData() {
