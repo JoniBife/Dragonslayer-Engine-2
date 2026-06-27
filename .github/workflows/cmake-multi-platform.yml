@@ -87,6 +87,7 @@ jobs:
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -DENABLE_HOT_RELOADING=${{ matrix.hot_reload }}
+        -DDS_USE_X11=${{ matrix.os == 'ubuntu-latest' && 'ON' || 'OFF' }}
         -S ${{ github.workspace }}
 
     - name: Build
