@@ -21,7 +21,7 @@ bool EditorCamera::FreeMovement(float elapsedTime, const Vec2& currMousePosition
         pitch -= mouseMovement.y * elapsedTime * rotationSpeed;
 
         // Avoiding float overflow by returning to degrees after a full rotation
-        yaw = fmodf(yaw, 360.0f);
+        yaw = std::fmod(yaw, 360.0f);
 
         // Cannot move camera above or below origin
         pitch = std::clamp(pitch, -89.0f, 89.0f);
@@ -194,20 +194,20 @@ void EditorCamera::Assign(const Camera& other) {
     camera.Assign(other);
     const Vec3 forward = camera.GetForward();
     this->pitch = RadiansToDegrees(std::clamp(asinf(forward.y), -1.f, 1.f));
-    this->yaw = RadiansToDegrees(atan2f(forward.z, forward.x));
+    this->yaw = RadiansToDegrees(std::atan2(forward.z, forward.x));
 }
 
 void EditorCamera::SetTarget(const Vec3 &target) {
     camera.SetTarget(target);
     const Vec3 forward = camera.GetForward();
     this->pitch = RadiansToDegrees(std::clamp(asinf(forward.y), -1.f, 1.f));
-    this->yaw = RadiansToDegrees(atan2f(forward.z, forward.x));
+    this->yaw = RadiansToDegrees(std::atan2(forward.z, forward.x));
 }
 
 void EditorCamera::SetFront(const Vec3 &front) {
     camera.SetFront(front);
     this->pitch = RadiansToDegrees(std::clamp(asinf(front.y), -1.f, 1.f));
-    this->yaw = RadiansToDegrees(atan2f(front.z, front.x));
+    this->yaw = RadiansToDegrees(std::atan2(front.z, front.x));
 }
 
 void EditorCamera::SetPosition(const Vec3& position) {

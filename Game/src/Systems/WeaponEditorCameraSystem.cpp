@@ -72,7 +72,7 @@ void WeaponEditorCameraSystem::Update(ThreadContext& threadContext, Vault& vault
     // Update tracked rotation and zoom
     camera.rotation += requestedRotation * ROTATION_SPEED * gTime.deltaTime;
     camera.rotation.y = std::clamp(camera.rotation.y, -80.f, 50.f);
-    camera.rotation.x = std::fmodf(camera.rotation.x, 360.f);
+    camera.rotation.x = std::fmod(camera.rotation.x, 360.f);
     camera.zoom = std::clamp(camera.zoom - requestedZoom * ZOOM_SPEED * gTime.deltaTime, 0.2f, 2.f);
 
     // Compute new camera location and orientation based on the rotation and zoom
