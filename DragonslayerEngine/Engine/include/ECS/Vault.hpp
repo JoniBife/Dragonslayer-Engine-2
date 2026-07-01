@@ -6,7 +6,6 @@
 #include "Core/Containers/ContainerView.hpp"
 #include "Core/Containers/HashMap.hpp"
 #include "Core/Export.hpp"
-#include "Core/IO/File.hpp"
 #include "Core/Macros.hpp"
 #include "Core/NotCopyable.hpp"
 #include "Core/String.hpp"

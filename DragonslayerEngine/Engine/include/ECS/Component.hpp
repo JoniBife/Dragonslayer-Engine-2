@@ -44,7 +44,7 @@ public: \
     #Component" is missing: GENERATE_D"#Kind"_BODY("#Component")");
 
 template<typename Component>
-concept IsBulkSerializable = std::is_trivially_copyable_v<Component> && std::is_default_constructible_v<Component>;
+concept IsTriviallySerializable = std::is_trivially_copyable_v<Component> && std::is_default_constructible_v<Component>;
 
 using VaultFile = BufferedFile<FreeListAllocator>;
 
@@ -56,7 +56,7 @@ concept HasCustomSerialization = requires(Component& component, void* obj, Vault
 
 #define VALIDATE_SERIALIZATION(Component) \
     static_assert(!IsSerializable<Component> || \
-        (IsBulkSerializable<Component> || HasCustomSerialization<Component>), \
+        (IsTriviallySerializable<Component> || HasCustomSerialization<Component>), \
         #Component" is not trivially copyable nor default constructible thus needs to implement: void Serialize(VaultFile&)" \
         "and static void Deserialize(void*, VaultFile&)");
 
@@ -135,14 +135,14 @@ struct ComponentFunctions {
             .serialize = nullptr,
             .deserialize = nullptr
         };
-
-        if constexpr (!std::is_trivially_constructible_v<Component> && std::is_default_constructible_v<Component>) {
+        
+        if constexpr (std::is_default_constructible_v<Component>)
+        {
             functions.defaultConstructor = &PairDefaultConstructor<Component>;
         }
 
-        if constexpr (
-            IsSerializable<Component> &&
-            (!IsBulkSerializable<Component> || HasCustomSerialization<Component>)) {
+        if constexpr (HasCustomSerialization<Component>)
+        {
             functions.serialize = &PairSerialize<Component>;
             functions.deserialize = &PairDeserialize<Component>;
         }
@@ -217,8 +217,8 @@ ENGINE_API InlineArray<ComponentConstructionData, MAX_COMPONENT_TYPES>& GetCompo
     static const Component##ConstructionDataInitializer Component##ConstructionDataInitializer;
 
 #if WITH_EDITOR
-#include "Editor/ComponentMetadata.hpp"
 #include <imgui.h>
+#include "Editor/ComponentMetadata.hpp"
 #include "Editor/ImGuiExtensions.hpp"
 
 #define DSTRUCT(Component, ...) \

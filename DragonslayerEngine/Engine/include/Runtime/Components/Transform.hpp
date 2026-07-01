@@ -2,6 +2,7 @@
 
 #include "ECS/Component.hpp"
 
+#include "Math/Mat4.hpp"
 #include "Math/Quat.hpp"
 #include "Math/Vec3.hpp"
 

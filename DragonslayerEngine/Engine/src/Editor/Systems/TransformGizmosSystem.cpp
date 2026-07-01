@@ -53,6 +53,7 @@ void TransformGizmosSystem::Start(ThreadContext& threadContext, Vault& vault) {
 }
 
 void TransformGizmosSystem::Update(ThreadContext& threadContext, Vault& vault) {
+
     if (!threadContext.IsMainThread()) {
         return;
     }
@@ -121,6 +122,11 @@ void TransformGizmosSystem::Update(ThreadContext& threadContext, Vault& vault) {
     float rotationMatrix[16];
     selectedTransform.ToMat4().ToOpenGLFormat(rotationMatrix);
 
+    if (gEditorCamera->IsFreeModeEnabled() || gEditorCamera->IsDragModeEnabled())
+    {
+        io.SetAppAcceptingEvents(false);
+    }
+
     if (ImGuizmo::Manipulate(viewMatrix, projectionMatrix, selectedOperation, selectedCoordinateSystem, rotationMatrix, nullptr)) {
         float matrixTranslation[3], matrixRotation[3], matrixScale[3];
         ImGuizmo::DecomposeMatrixToComponents(rotationMatrix, matrixTranslation, matrixRotation, matrixScale);
@@ -140,5 +146,10 @@ void TransformGizmosSystem::Update(ThreadContext& threadContext, Vault& vault) {
             rigidBody->positionLastPhysicsUpdate = newLocation;
             rigidBody->rotationLastPhysicsUpdate = newRotation;
         }
+    }
+
+    if (gEditorCamera->IsFreeModeEnabled() || gEditorCamera->IsDragModeEnabled())
+    {
+        io.SetAppAcceptingEvents(true);
     }
 }

@@ -362,6 +362,7 @@ set(MATH_FILES
     "include/Math/Mat3.hpp"
     "include/Math/Mat4.hpp"
     "include/Math/MathAux.hpp"
+    "include/Math/MathFwd.hpp"
     "include/Math/Quat.hpp"
     "include/Math/Vec2.hpp"
     "include/Math/Vec3.hpp"
@@ -439,6 +440,7 @@ set(ENGINE_FILES
     ${RENDERER_FILES}
     ${PHYSICS_FILES}
     ${RUNTIME_FILES}
+        include/Math/MathFwd.hpp
 )
 
 if(DS_WITH_EDITOR)

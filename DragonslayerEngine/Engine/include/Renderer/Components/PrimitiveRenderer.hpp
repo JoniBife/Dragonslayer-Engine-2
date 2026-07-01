@@ -24,7 +24,7 @@ DSTRUCT(PrimitiveRenderer, .isSerializable = true, .hasMetadata = true, .isDispl
     GENERATE_DSTRUCT_BODY(PrimitiveRenderer)
 
     PrimitiveType primitiveType = PrimitiveType::Cube;
-    Vec3 color = { 1.f, 0.f, 0.f};
+    Vec3 color = { .5f, 0.5f, 0.5f};
     float alpha = 1.f;
     bool castShadow = true;
     bool isVisible = true;

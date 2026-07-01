@@ -10,6 +10,7 @@
 #include <Renderer/Components/PrimitiveRenderer.hpp>
 #include <Runtime/Components/PhysicsNPC.hpp>
 #include <Runtime/Input.hpp>
+#include <Math/Mat3.hpp>
 
 #include "Game/Components/FollowEntity.hpp"
 #include "Game/Components/GameState.hpp"

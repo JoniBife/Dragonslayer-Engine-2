@@ -1,17 +1,10 @@
 #include "Editor/Systems/EditorCameraSystem.hpp"
 
-#include <Physics/Components/StaticRigidBody.hpp>
-#include <Physics/PhysicsCommon.hpp>
-#include <Renderer/Components/PrimitiveRenderer.hpp>
-#include <Runtime/Components/Transform.hpp>
-
 #include "Core/EngineGlobals.hpp"
 #include "Core/Time.hpp"
-
 #include "Editor/EditorCamera.hpp"
 #include "Editor/EditorGlobals.hpp"
-
-#include "Runtime/Input.hpp"
+#include "Physics/PhysicsCommon.hpp"
 
 void EditorCameraSystem::Start(ThreadContext& threadContext, Vault& vault) {
     if (!threadContext.IsMainThread()) {

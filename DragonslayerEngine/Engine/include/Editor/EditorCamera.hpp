@@ -47,6 +47,8 @@ public:
 	NO_DISCARD float GetRotationSpeed() const;
 	NO_DISCARD float GetDragSpeed() const;
 	NO_DISCARD float GetZoomSpeed() const;
+	NO_DISCARD bool IsFreeModeEnabled() const;
+	NO_DISCARD bool IsDragModeEnabled() const;
 
 	void Move(float elapsedTime);
 

@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Core/Export.hpp"
-#include "Mat4.hpp"
+#include "Core/Macros.hpp"
+#include "MathFwd.hpp"
 
 struct ENGINE_API Quat {
 
@@ -42,13 +43,10 @@ struct ENGINE_API Quat {
 
     static Quat Lerp(const Quat& q0, const Quat& q1, float k);
     static Quat Slerp(const Quat& q0, const Quat& q1, float k);
-    static Quat FromDir(const Vec3& dir, const Vec3& ref = { 0.0f, 0.0f, 1.0f });
+    static Quat FromDir(const Vec3& dir, const Vec3& ref);
     static Quat FromEuler(float roll, float pitch, float yaw);
     static Quat FromTo(const Vec3& from, const Vec3& to);
 
     NO_DISCARD Mat4 ToRotationMatrix() const;
     NO_DISCARD Mat3 ToRotationMatrix3x3() const;
-
-    friend std::ostream& operator<<(std::ostream& os, const Quat& Qtrn);
-    void PrintAngleAxis();
 };

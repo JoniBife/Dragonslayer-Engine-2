@@ -30,12 +30,3 @@ static_assert(sizeof(uint16) == 2, "Invalid size of uint16");
 static_assert(sizeof(uint32) == 4, "Invalid size of uint32");
 static_assert(sizeof(uint64) == 8, "Invalid size of uint64");
 static_assert(sizeof(void*) == (DS_CPU_64_BITS ? 8 : 4), "Invalid size of pointer");
-
-// Math types
-struct Vec2;
-struct Vec3;
-struct Vec4;
-struct Mat2;
-struct Mat3;
-struct Mat4;
-struct Quat;

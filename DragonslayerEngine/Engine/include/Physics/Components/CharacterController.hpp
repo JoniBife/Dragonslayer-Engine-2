@@ -17,7 +17,7 @@
 
 using namespace physx;
 
-ENGINE_DSTRUCT(CharacterController, .numComponents = 4, .isSerializable = true, .hasMetadata = true, .isDisplayable = true) final {
+ENGINE_DSTRUCT(CharacterController, .numComponents = 4, .isSerializable = true, .hasMetadata = true, .isDisplayable = false) final {
 
     GENERATE_DSTRUCT_BODY(CharacterController)
 
@@ -53,7 +53,7 @@ ENGINE_DSTRUCT(CharacterController, .numComponents = 4, .isSerializable = true, 
         desc.position = PxExtendedVec3(position.x, position.y, position.z);
         desc.upDirection = PxVec3(0.f, 1.f, 0.f);
         desc.stepOffset = stepOffset;
-        desc.slopeLimit = cosf(slopeLimitRadians);
+        desc.slopeLimit = std::cosf(slopeLimitRadians);
         desc.contactOffset = contactOffset;
         desc.climbingMode = PxCapsuleClimbingMode::eCONSTRAINED;
         ASSERT(desc.isValid(), "Invalid PxCapsuleControllerDesc!");

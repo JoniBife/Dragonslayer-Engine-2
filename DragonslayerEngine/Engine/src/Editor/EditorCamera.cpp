@@ -190,6 +190,16 @@ float EditorCamera::GetZoomSpeed() const
     return zoomSpeed;
 }
 
+bool EditorCamera::IsFreeModeEnabled() const
+{
+    return freeModeEnabled;
+}
+
+bool EditorCamera::IsDragModeEnabled() const
+{
+    return dragModeEnabled;
+}
+
 void EditorCamera::Assign(const Camera& other) {
     camera.Assign(other);
     const Vec3 forward = camera.GetForward();

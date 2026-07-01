@@ -4,8 +4,11 @@
 #include <imgui_internal.h>
 
 #include "Math/MathAux.hpp"
+#include "Math/Vec3.hpp"
+#include "Math/Vec4.hpp"
+#include "Math/Quat.hpp"
 
-void ImGui::Vec2(const char *label, const LVec2 &v) {
+void ImGui::Vec2(const char *label, const struct Vec2 &v) {
     const float inputFieldsWidth = ImGui::GetContentRegionAvail().x * 0.25f;
 
     ImGui::Text(label);
@@ -19,7 +22,7 @@ void ImGui::Vec2(const char *label, const LVec2 &v) {
     ImGui::Text("%f", v.y); ImGui::SameLine();
 }
 
-void ImGui::Vec3(const char *label, const LVec3 &v) {
+void ImGui::Vec3(const char *label, const struct Vec3 &v) {
     const float inputFieldsWidth = ImGui::GetContentRegionAvail().x * 0.25f;
 
     ImGui::Text(label);
@@ -37,7 +40,7 @@ void ImGui::Vec3(const char *label, const LVec3 &v) {
     ImGui::Text("%f", v.z);
 }
 
-void ImGui::Vec4(const char *label, const LVec4 &v) {
+void ImGui::Vec4(const char *label, const struct Vec4 &v) {
     const float inputFieldsWidth = ImGui::GetContentRegionAvail().x * 0.25f;
 
     ImGui::Text(label);
@@ -59,10 +62,10 @@ void ImGui::Vec4(const char *label, const LVec4 &v) {
     ImGui::Text("%f", v.w);
 }
 
-void ImGui::Quat(const char *label, const LQuat &q, bool asEulerAngles) {
+void ImGui::Quat(const char *label, const struct Quat &q, bool asEulerAngles) {
 
     if (asEulerAngles) {
-        LVec3 euler;
+        struct Vec3 euler;
         q.ToEuler(euler.x, euler.y, euler.z);
 
         euler.x = RadiansToDegrees(euler.x);
@@ -93,7 +96,7 @@ void ImGui::Quat(const char *label, const LQuat &q, bool asEulerAngles) {
     }
 }
 
-bool ImGui::InputVec2(const char *label, LVec2 &v) {
+bool ImGui::InputVec2(const char *label, struct Vec2 &v) {
     const float inputFieldsWidth = ImGui::GetContentRegionAvail().x * 0.25f;
 
     bool valueChanged = false;
@@ -112,7 +115,7 @@ bool ImGui::InputVec2(const char *label, LVec2 &v) {
     return valueChanged;
 }
 
-bool ImGui::InputVec3(const char *label, LVec3 &v) {
+bool ImGui::InputVec3(const char *label, struct Vec3 &v) {
     const float inputFieldsWidth = ImGui::GetContentRegionAvail().x * 0.25f;
 
     bool valueChanged = false;
@@ -135,7 +138,7 @@ bool ImGui::InputVec3(const char *label, LVec3 &v) {
     return valueChanged;
 }
 
-bool ImGui::InputVec4(const char *label, LVec4 &v) {
+bool ImGui::InputVec4(const char *label, struct Vec4 &v) {
     const float inputFieldsWidth = ImGui::GetContentRegionAvail().x * 0.25f;
 
     bool valueChanged = false;
@@ -162,7 +165,7 @@ bool ImGui::InputVec4(const char *label, LVec4 &v) {
     return valueChanged;
 }
 
-bool ImGui::InputQuat(const char *label, LQuat &q, bool asEulerAngles) {
+bool ImGui::InputQuat(const char *label, struct Quat &q, bool asEulerAngles) {
 
     if (asEulerAngles) {
         float roll, pitch, yaw;
@@ -198,7 +201,7 @@ bool ImGui::InputQuat(const char *label, LQuat &q, bool asEulerAngles) {
             pitch = DegreesToRadians(pitch);
             yaw = DegreesToRadians(yaw);
 
-            q = LQuat::FromEuler(roll, pitch, yaw);
+            q = Quat::FromEuler(roll, pitch, yaw);
         }
 
         return valueChanged;
@@ -236,12 +239,12 @@ bool ImGui::InputQuat(const char *label, LQuat &q, bool asEulerAngles) {
     }
 }
 
-bool ImGui::IsInsidePreviousItem(const LVec2& position) {
+bool ImGui::IsInsidePreviousItem(const struct Vec2& position) {
     const ImVec2 rectMin = ImGui::GetItemRectMin();
     const ImVec2 rectMax = ImGui::GetItemRectMax();
     return position.x >= rectMin.x && position.x <= rectMax.x && position.y >= rectMin.y && position.y <= rectMax.y;
 }
-bool ImGui::IsInsideWindow(const LVec2& position) {
+bool ImGui::IsInsideWindow(const struct Vec2& position) {
     const ImVec2 winPos = ImGui::GetWindowPos();
     const ImVec2 winSize = ImGui::GetWindowSize();
     return position.x >= winPos.x && position.x <= winPos.x + winSize.x && position.y >= winPos.y && position.y <= winPos.y + winSize.y;

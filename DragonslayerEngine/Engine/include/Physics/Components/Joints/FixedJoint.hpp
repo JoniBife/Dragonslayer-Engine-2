@@ -7,7 +7,7 @@
 #include "Physics/Components/DynamicRigidBody.hpp"
 #include "Physics/Components/StaticRigidBody.hpp"
 
-ENGINE_DSTRUCT(FixedJoint, .numComponents = 1024, .hasMetadata = true, .isDisplayable = true) final  {
+ENGINE_DSTRUCT(FixedJoint, .numComponents = 1024, .hasMetadata = true, .isDisplayable = false) final  {
 
     GENERATE_DSTRUCT_BODY(FixedJoint)
 

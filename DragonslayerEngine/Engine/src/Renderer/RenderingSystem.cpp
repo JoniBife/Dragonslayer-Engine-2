@@ -19,6 +19,7 @@
 #include "Editor/ImGuiSetup.hpp"
 #endif
 
+#include "Math/Mat3.hpp"
 #include "Physics/Components/CharacterController.hpp"
 #include "Physics/Components/DynamicRigidBody.hpp"
 #include "Renderer/Shader.hpp"
@@ -28,7 +29,6 @@
 
 // Settings
 constexpr nri::VKBindingOffsets VK_BINDING_OFFSETS = {0, 128, 32, 64}; // see CMake
-constexpr bool D3D12_DISABLE_ENHANCED_BARRIERS = false;
 
 constexpr uint32 GLOBAL_DESCRIPTOR_SET = 0;
 constexpr uint32 SHADOWS_DESCRIPTOR_SET = 1;
@@ -245,7 +245,7 @@ void RenderingSystem::InitDevice() {
         .vkBindingOffsets = VK_BINDING_OFFSETS,
         .enableNRIValidation = settings.debugNRI,
         .enableGraphicsAPIValidation = settings.debugAPI,
-        .disableD3D12EnhancedBarriers = D3D12_DISABLE_ENHANCED_BARRIERS,
+        .disableD3D12EnhancedBarriers = false,
     };
     NRI_ABORT_ON_FAILURE(nri::nriCreateDevice(deviceCreationDesc, device));
 
@@ -1313,10 +1313,10 @@ static void CreateInstance(
 
     if (renderer.isVisible) {
         instance.flags |= InstanceFlag::IsVisible;
-    }
 
-    if (renderer.castShadow) {
-        instance.flags |= InstanceFlag::CastsShadow;
+        if (renderer.castShadow) {
+            instance.flags |= InstanceFlag::CastsShadow;
+        }
     }
 }
 

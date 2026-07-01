@@ -1,11 +1,10 @@
+#include "Math/Mat3.hpp"
 
 #include <cmath>
 
-#include "Math/Mat3.hpp"
-
-#include "Core/Assert.hpp"
 #include "Math/MathAux.hpp"
 #include "Math/Quat.hpp"
+#include "Math/Vec3.hpp"
 
 Mat3::Mat3() : Mat3(0) {}
 
@@ -376,27 +375,4 @@ void Mat3::ToOpenGLFormat(float array[9]) const {
 
 bool Mat3::IsOrthogonal() const {
 	return *this * this->Transpose() == Mat3::IDENTITY;
-}
-
-std::ostream& operator<<(std::ostream& os, const Mat3& mat3) {
-	for (int l = 0; l < 3; l++) {
-		os << "[ ";
-		for (int c = 0; c < 3; c++) {
-			os << mat3.m[l][c];
-			if (c < 2) {
-				os << " , ";
-			}
-		}
-		os << " ]" << std::endl;
-	}
-	return os;
-}
-
-std::istream& operator>>(std::istream& is, Mat3& mat3) {
-	for (int l = 0; l < 3; l++) {
-		for (int c = 0; c < 3; c++) {
-			is >> mat3.m[l][c];
-		}
-	}
-	return is;
 }

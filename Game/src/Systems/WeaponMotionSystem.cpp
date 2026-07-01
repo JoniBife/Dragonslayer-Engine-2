@@ -1,27 +1,32 @@
 #include "Game/Systems/WeaponMotionSystem.hpp"
 
-#include <Core/EngineGlobals.hpp>
-#include <Core/Time.hpp>
-
 #if WITH_EDITOR
 #include <Editor/EditorGlobals.hpp>
 #endif
 
+#include <PxPhysicsAPI.h>
+#include <Core/EngineGlobals.hpp>
+#include <Core/Time.hpp>
+#include <Math/Mat3.hpp>
 #include <Math/MathAux.hpp>
+#include <Physics/PhysicsCommon.hpp>
 #include <Physics/Components/CharacterController.hpp>
 #include <Physics/Components/CollisionEvent.hpp>
 #include <Physics/Components/DynamicRigidBody.hpp>
-#include <Physics/PhysicsCommon.hpp>
-#include <PxPhysicsAPI.h>
 #include <Renderer/Camera.hpp>
 #include <Renderer/Components/PrimitiveRenderer.hpp>
+#include <Runtime/Input.hpp>
 #include <Runtime/Components/PhysicsNPC.hpp>
 #include <Runtime/Components/Transform.hpp>
-#include <Runtime/Input.hpp>
 
-#include "Game/Components/Enemies/Enemy.hpp"
+#include "Game/ModulesAndHandles.hpp"
+#include "Game/PhysicsCollisionGroups.hpp"
 #include "Game/Components/FollowEntity.hpp"
 #include "Game/Components/GameState.hpp"
+#include "Game/Components/Player.hpp"
+#include "Game/Components/Projectile.hpp"
+#include "Game/Components/WeaponRuntime.hpp"
+#include "Game/Components/Enemies/Enemy.hpp"
 #include "Game/Components/Handles/ShootV1Handle.hpp"
 #include "Game/Components/Handles/ShootV2Handle.hpp"
 #include "Game/Components/Handles/ShootV3Handle.hpp"
@@ -31,11 +36,6 @@
 #include "Game/Components/Modules/PistonModule.hpp"
 #include "Game/Components/Modules/RotatorModule.hpp"
 #include "Game/Components/Modules/ShootModule.hpp"
-#include "Game/Components/Player.hpp"
-#include "Game/Components/Projectile.hpp"
-#include "Game/Components/WeaponRuntime.hpp"
-#include "Game/ModulesAndHandles.hpp"
-#include "Game/PhysicsCollisionGroups.hpp"
 
 void WeaponMotionSystem::Start(ThreadContext& threadContext, Vault& vault) {
     if (!threadContext.IsMainThread()) {

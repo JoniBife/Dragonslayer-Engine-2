@@ -305,6 +305,7 @@ void EntityHierarchySystem::Update(ThreadContext& threadContext, Vault& vault) {
     }
 
     if (ImGui::Begin("Hierarchy", &showHierarchy)) {
+
         if (ImGui::BeginChild("##tree", ImVec2(300, 0), ImGuiChildFlags_ResizeX | ImGuiChildFlags_Borders | ImGuiChildFlags_NavFlattened)) {
 
             // Entity Name Filter
@@ -397,10 +398,55 @@ void EntityHierarchySystem::Update(ThreadContext& threadContext, Vault& vault) {
                         }
 
                         if (void* component = componentMetadata.getComponent(vault, selectedEntity)) {
-                            componentMetadata.onEditorUI(component);
+                            if (componentMetadata.onEditorUI(component))
+                            {
+                                componentMetadata.destroyComponent(vault, selectedEntity);
+                            }
                         }
                     }
                 }
+
+                ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5f, 0.5f));
+
+                const char* componentsPopupID = "componentsPopup";
+                // Button uses all available horizontal space
+                if (ImGui::Button("Add Component", ImVec2(-FLT_MIN, 0.0f))) {
+                    ImGui::OpenPopup(componentsPopupID);
+                }
+                ImGui::PopStyleVar();
+
+                if (ImGui::BeginPopup(componentsPopupID))
+                {
+                    ImGui::SetNextItemWidth(-FLT_MIN);
+                    ImGui::SetNextItemShortcut(ImGuiMod_Ctrl | ImGuiKey_F, ImGuiInputFlags_Tooltip);
+                    ImGui::PushItemFlag(ImGuiItemFlags_NoNavDefaultFocus, true);
+                    static ImGuiTextFilter textFilter;
+                    if (ImGui::InputTextWithHint("##Filter", "incl,-excl", textFilter.InputBuf, IM_ARRAYSIZE(textFilter.InputBuf), ImGuiInputTextFlags_EscapeClearsAll))
+                        textFilter.Build();
+                    ImGui::PopItemFlag();
+                    ImGui::Separator();
+
+                    for (ComponentMetadata& componentMetadata: GetComponentsMetadata()) {
+
+                        if (componentMetadata.getComponentFlags().isDisplayable) {
+
+                            if (!textFilter.PassFilter(componentMetadata.componentName.CStr()))
+                            {
+                                continue;
+                            }
+
+                            // Only display components entity does not already have
+                            if (!componentMetadata.getComponent(vault, selectedEntity)) {
+                                if (ImGui::Selectable(componentMetadata.componentName.CStr())) {
+                                    componentMetadata.createComponent(vault, selectedEntity);
+                                }
+                            }
+                        }
+                    }
+
+                    ImGui::EndPopup();
+                }
+
 
                 // TODO Fix this hack
                 // Without it the scroll bar does not scroll as further down as it should leaving some elements invisible

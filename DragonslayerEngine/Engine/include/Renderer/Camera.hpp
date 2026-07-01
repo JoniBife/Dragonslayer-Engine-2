@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Math/Mat4.hpp"
-#include "Math/Vec2.hpp"
+#include "Math/Vec3.hpp"
 
 /*
  * TODO Update this camera class, this is extremely outdated! Function names etc..

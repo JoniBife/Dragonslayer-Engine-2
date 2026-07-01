@@ -2,7 +2,7 @@
 
 #include "Core/Export.hpp"
 #include "Core/Macros.hpp"
-#include "Vec2.hpp"
+#include "MathFwd.hpp"
 
 struct ENGINE_API Mat2 {
 
@@ -51,12 +51,4 @@ struct ENGINE_API Mat2 {
 	NO_DISCARD float Determinant() const;
 	void ToOpenGLFormat(float array[4]) const;
 	NO_DISCARD bool IsOrthogonal() const;
-
-	/*
-	 * Print result example:
-	* [ 1 , 0 ]
-	* [ 0 , 1 ]
-	*/
-	friend std::ostream& operator<<(std::ostream& os, const Mat2& mat2);
-	friend std::istream& operator>>(std::istream& is, Mat2& mat2);
 };

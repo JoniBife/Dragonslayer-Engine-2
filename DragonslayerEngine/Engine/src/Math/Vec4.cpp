@@ -1,7 +1,6 @@
+#include "Math/Vec4.hpp"
 
 #include <cmath>
-
-#include "Math/Vec4.hpp"
 
 #include "Core/Assert.hpp"
 #include "Math/MathAux.hpp"
@@ -136,10 +135,6 @@ void Vec4::ToOpenGLFormat(float array[4]) const {
 
 float Dot(const Vec4& a, const Vec4& b) {
 	return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
-}
-
-std::ostream& operator<<(std::ostream& os, const Vec4& vec4) {
-	return os << "(" << vec4.x << "," << vec4.y << "," << vec4.z << "," << vec4.w << ')';
 }
 
 Vec4 operator*(float scalar, const Vec4& vec4) {

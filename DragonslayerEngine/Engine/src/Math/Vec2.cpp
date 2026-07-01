@@ -1,11 +1,12 @@
+#include "Math/Vec2.hpp"
 
 #include <algorithm>
 #include <cmath>
 
-#include "Math/Vec2.hpp"
-
 #include "Core/Assert.hpp"
 #include "Math/MathAux.hpp"
+#include "Math/Vec4.hpp"
+#include "Math/Vec3.hpp"
 
 Vec2::Vec2() : Vec2(0.f) { }
 Vec2::Vec2(float xy) : Vec2(xy,xy) { }
@@ -136,10 +137,6 @@ Vec2 Vec2::FromOrientation(float angleRad) {
 
 float Dot(const Vec2& a, const Vec2& b) {
 	return a.x * b.x + a.y * b.y;
-}
-
-std::ostream& operator<<(std::ostream& os, const Vec2& vec2) {
-	return os << "(" << vec2.x << "," <<  vec2.y << ')';
 }
 
 Vec2 operator*(float scalar, const Vec2& vec2) {

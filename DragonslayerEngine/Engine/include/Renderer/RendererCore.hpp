@@ -5,6 +5,8 @@
 // NRI: core & common extensions
 #include <NRI.h>
 
+#include <cstdio>
+
 #include "Core/Log.hpp"
 #include "Core/Allocators/FreeListAllocator.hpp"
 #include "Core/Containers/Array.hpp"
@@ -12,6 +14,7 @@
 #include "Extensions/NRIDeviceCreation.h"
 #include "Math/Mat4.hpp"
 #include "Math/Vec3.hpp"
+#include "Math/Vec4.hpp"
 
 #define NRI_ABORT_ON_FAILURE(result) \
     if ((result) != nri::Result::SUCCESS) { \
@@ -231,7 +234,7 @@ static void NRIFree(void* userArg, void* memory) {
 static void NRIMessage(nri::Message messageType, const char* file, uint32_t line, const char* message, void* userArg) {
 
     char logString[MAX_LOG_LENGTH];
-    sprintf(logString, "[NRI] %s (%d) : %s\n", file, line, message);
+    std::sprintf(logString, "[NRI] %s (%d) : %s\n", file, line, message);
 
     switch (messageType) {
         case nri::Message::INFO: {

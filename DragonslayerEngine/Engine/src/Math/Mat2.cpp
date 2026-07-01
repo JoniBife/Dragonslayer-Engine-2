@@ -1,5 +1,7 @@
 #include "Math/Mat2.hpp"
+
 #include "Math/MathAux.hpp"
+#include "Math/Vec2.hpp"
 
 Mat2::Mat2() : Mat2(0) {}
 Mat2::Mat2(float fill) : Mat2(fill, fill, fill, fill) {}
@@ -258,27 +260,4 @@ void Mat2::ToOpenGLFormat(float array[4]) const {
 
 bool Mat2::IsOrthogonal() const {
 	return *this * this->Transpose() == IDENTITY;
-}
-
-std::ostream& operator<<(std::ostream& os, const Mat2& mat2) {
-	for (int l = 0; l < 2; l++) {
-		os << "[ ";
-		for (int c = 0; c < 2; c++) {
-			os << mat2.m[l][c];
-			if (c < 1) {
-				os << " , ";
-			}
-		}
-		os << " ]" << std::endl;
-	}
-	return os;
-}
-
-std::istream& operator>>(std::istream& is, Mat2& mat2) {
-	for (int l = 0; l < 2; l++) {
-		for (int c = 0; c < 2; c++) {
-			is >> mat2.m[l][c];
-		}
-	}
-	return is;
 }

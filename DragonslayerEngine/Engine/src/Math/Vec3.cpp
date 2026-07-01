@@ -1,8 +1,9 @@
+#include "Math/Vec3.hpp"
 
 #include <cmath>
 
-#include "Math/Vec3.hpp"
 #include "Math/MathAux.hpp"
+#include "Math/Vec4.hpp"
 
 Vec3::Vec3() : Vec3(0.f) {}
 Vec3::Vec3(float xyz) : Vec3(xyz, xyz, xyz) {}
@@ -215,10 +216,6 @@ Vec3 Rodrigues(Vec3 v, float thetaRadians, Vec3 k) {
 	Vec3 unitK = k.Normalize();
 
 	return v * std::cos(thetaRadians) + Cross(unitK, v)* std::sin(thetaRadians) + unitK * Dot(unitK, v) * (1 - std::cos(thetaRadians));
-}
-
-std::ostream& operator<<(std::ostream& os, const Vec3& vec3) {
-	return os << "(" << vec3.x << "," << vec3.y << "," << vec3.z << ')';
 }
 
 Vec3 operator*(float scalar, const Vec3& vec3) {

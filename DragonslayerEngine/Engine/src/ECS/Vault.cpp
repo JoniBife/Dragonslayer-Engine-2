@@ -133,9 +133,7 @@ bool FixedComponentPool::DeserializeComponent(Entity entity, VaultFile& file) {
     if (componentFunctions.deserialize) {
         componentFunctions.deserialize(component, file);
     } else {
-        if (componentFunctions.defaultConstructor) {
-            componentFunctions.defaultConstructor(component);
-        }
+        componentFunctions.defaultConstructor(component);
         uint32 bytesRead;
         file.ReadBytes(component, componentSize, bytesRead);
     }
@@ -176,12 +174,10 @@ bool FixedComponentPool::Deserialize(VaultFile& file) {
         }
     } else {
 
-        // If the component is default constructible
-        if (componentFunctions.defaultConstructor) {
-            for (size_t i = 0; i < activeComponents; ++i) {
-                componentFunctions.defaultConstructor(GetPairAt(i));
-            }
+        for (size_t i = 0; i < activeComponents; ++i) {
+            componentFunctions.defaultConstructor(GetPairAt(i));
         }
+
         // Bulk deserialize trivially copyable components
         uint32 bytesRead;
         file.ReadBytes(componentEntityPairs, componentEntityPairSize*activeComponents, bytesRead);

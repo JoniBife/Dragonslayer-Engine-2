@@ -1,8 +1,13 @@
 #include "Renderer/Camera.hpp"
 
+#include <cmath>
+
 #include "Core/Assert.hpp"
-#include "Editor/ImGuiExtensions.hpp"
+#include "Math/Mat3.hpp"
 #include "Math/MathAux.hpp"
+#include "Math/Quat.hpp"
+#include "Math/Vec2.hpp"
+#include "Math/Vec4.hpp"
 
 void Camera::Update() {
     if (dirty) {
@@ -159,6 +164,7 @@ float Camera::GetAspectRatio() const
 {
 	return viewportWidth / viewportHeight;
 }
+
 Quat Camera::GetRotation() const {
     return Mat3(forward, right, up).ToQuaternion();
 }

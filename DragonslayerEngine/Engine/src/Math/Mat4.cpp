@@ -1,11 +1,12 @@
+#include "Math/Mat4.hpp"
 
 #include <cmath>
 
-#include "Math/Mat4.hpp"
-
-#include <Core/Assert.hpp>
-
+#include "Core/Assert.hpp"
 #include "Math/MathAux.hpp"
+#include "Math/Vec3.hpp"
+#include "Math/Vec4.hpp"
+#include "Math/Mat3.hpp"
 
 Mat4::Mat4() : Mat4(0) {}
 
@@ -114,7 +115,7 @@ Mat4 Mat4::Rotation(float angleRad, const Vec3& axis)
 	return identity + std::sin(angleRad) * dualMatrix + (1 - std::cos(angleRad)) * dualMatrixSqr;
 }
 
-Mat4 Mat4::RotationFromDir(const Vec3& dir, const Vec3& up) {
+Mat4 Mat4::RotationFromDir(const Vec3& dir, const Vec3& up = Vec3::UP) {
 	Vec3 xaxis = Cross(up, dir).Normalize();
 	Vec3 yaxis = Cross(dir, xaxis).Normalize();
 
@@ -679,34 +680,4 @@ void Mat4::Decompose(Vec3& scale, Vec3& rotation, Vec3& position) const
 	}
 
 	rotation = { pitch, yaw, roll };
-}
-
-/*
- * Print result example:
- * [ 1 , 0 , 0 , 0 ]
- * [ 0 , 1 , 0 , 0 ]
- * [ 0 , 0 , 1 , 0 ]
- * [ 0 , 0 , 0 , 1 ]
-*/
-std::ostream& operator<<(std::ostream& os, const Mat4& mat4) {
-	for (int l = 0; l < 4; l++) {
-		os << "[ ";
-		for (int c = 0; c < 4; c++) {
-			os << mat4.m[l][c];
-			if (c < 3) { // Only print comma until the third column
-				os << " , ";
-			}
-		}
-		os << " ]" << std::endl;
-	}
-	return os;
-}
-
-std::istream& operator>>(std::istream& is, Mat4& mat4) {
-	for (int l = 0; l < 4; l++) {
-		for (int c = 0; c < 4; c++) {
-			is >> mat4.m[l][c];
-		}
-	}
-	return is;
 }

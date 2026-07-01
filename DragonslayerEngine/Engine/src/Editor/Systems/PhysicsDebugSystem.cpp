@@ -5,6 +5,7 @@
 #include <imgui.h>
 
 #include "Core/EngineGlobals.hpp"
+#include "Editor/EditorGlobals.hpp"
 #include "Runtime/Input.hpp"
 #include "Runtime/Engine.hpp"
 
@@ -32,6 +33,11 @@ void PhysicsDebugSystem::PostPhysicsUpdate(ThreadContext& threadContext, Vault& 
 
 void PhysicsDebugSystem::Update(ThreadContext& threadContext, Vault& vault) {
     if (!threadContext.IsMainThread()) {
+        return;
+    }
+
+    if (!gIsPlayingGame)
+    {
         return;
     }
 

@@ -1,10 +1,8 @@
 #pragma once
 
-#include <iostream>
-
 #include "Core/Export.hpp"
 #include "Core/Macros.hpp"
-#include "Vec3.hpp"
+#include "MathFwd.hpp"
 
 struct ENGINE_API Mat3 {
 
@@ -54,7 +52,7 @@ struct ENGINE_API Mat3 {
 
 	NO_DISCARD float Determinant() const;
 	NO_DISCARD Mat3 Transpose() const;
-	NO_DISCARD struct Quat ToQuaternion() const;
+	NO_DISCARD Quat ToQuaternion() const;
 	NO_DISCARD Vec3 GetRightAxis() const;
 	NO_DISCARD Vec3 GetUpAxis() const;
 	NO_DISCARD Vec3 GetForwardAxis() const;
@@ -65,7 +63,4 @@ struct ENGINE_API Mat3 {
 	bool Inverse(Mat3& inverse) const;
 	void ToOpenGLFormat(float array[9]) const;
 	NO_DISCARD bool IsOrthogonal() const;
-
-	friend std::ostream& operator<<(std::ostream& os, const Mat3& mat3);
-	friend std::istream& operator>>(std::istream& is, Mat3& mat3);
 };

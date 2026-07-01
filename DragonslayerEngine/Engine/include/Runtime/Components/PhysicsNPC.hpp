@@ -17,7 +17,7 @@ DSTRUCT(PhysicsNPC, .hasMetadata = true, .isDisplayable = true) final {
     DynamicRigidBody dynamicRigidBody;
     PrimitiveRenderer primitiveRenderer;
 
-    explicit PhysicsNPC(const Transform& transform, const bool addManuallyToPhysicsScene = false) :
+    explicit PhysicsNPC(const Transform& transform = Transform(), const bool addManuallyToPhysicsScene = false) :
         transform(transform),
         dynamicRigidBody(transform, addManuallyToPhysicsScene) {
     }
@@ -40,9 +40,39 @@ DSTRUCT(PhysicsNPC, .hasMetadata = true, .isDisplayable = true) final {
 
 #if WITH_EDITOR
     void OnHierarchy() {
-        transform.OnEditorUI();
-        dynamicRigidBody.OnEditorUI();
-        primitiveRenderer.OnEditorUI();
+        {
+            static bool isOpen = true;
+            ImGui::SetNextItemOpen(isOpen);
+            if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_Framed)) {
+                isOpen = true;
+                transform.OnHierarchy();
+                ImGui::TreePop();
+            } else {
+                isOpen = false;
+            }
+        }
+        {
+            static bool isOpen = true;
+            ImGui::SetNextItemOpen(isOpen);
+            if (ImGui::TreeNodeEx("DynamicRigidBody", ImGuiTreeNodeFlags_Framed)) {
+                isOpen = true;
+                dynamicRigidBody.OnHierarchy();
+                ImGui::TreePop();
+            } else {
+                isOpen = false;
+            }
+        }
+        {
+            static bool isOpen = true;
+            ImGui::SetNextItemOpen(isOpen);
+            if (ImGui::TreeNodeEx("PrimitiveRenderer", ImGuiTreeNodeFlags_Framed)) {
+                isOpen = true;
+                primitiveRenderer.OnHierarchy();
+                ImGui::TreePop();
+            } else {
+                isOpen = false;
+            }
+        }
     }
 #endif
 

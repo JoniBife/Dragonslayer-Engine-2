@@ -1,9 +1,12 @@
+#include "Math/Quat.hpp"
 
 #include <cmath>
 
-#include "Math/Quat.hpp"
-#include "Math/MathAux.hpp"
 #include "Core/Assert.hpp"
+#include "Math/Mat3.hpp"
+#include "Math/Mat4.hpp"
+#include "Math/MathAux.hpp"
+#include "Math/Vec3.hpp"
 
 Quat::Quat() : Quat(1.0f, 0.0f, 0.0f, 0.0f) {}
 
@@ -213,7 +216,7 @@ Quat Quat::Slerp(const Quat& q0, const Quat& q1, float k) {
 	return Quat(q0 * scale0 + q1 * scale1).Normalize();
 }
 
-Quat Quat::FromDir(const Vec3& dir, const Vec3& ref) {
+Quat Quat::FromDir(const Vec3& dir, const Vec3& ref = Vec3::UP) {
 	Vec3 axis = Cross(ref, dir);
 	float dotProduct = Dot(ref, dir);
 	float halfAngle = std::acos(dotProduct) * .5f;
@@ -362,16 +365,4 @@ Mat3 Quat::ToRotationMatrix3x3() const {
         2.0f * (xy + zt), 1.0f - 2.0f * (xx + zz), 2.0f * (yz - xt),
         2.0f * (xz - yt), 2.0f * (yz + xt), 1.0f - 2.0f * (xx + yy)
     };
-}
-
-std::ostream& operator<<(std::ostream& os, const Quat& Qtrn) {
-	os << "(" << Qtrn.t << "," << Qtrn.x << "," << Qtrn.y << "," << Qtrn.z << "," << ")";
-	return os;
-}
-
-void Quat::PrintAngleAxis() {
-	float angleRad;
-	Vec3 axis;
-	ToAngleAxis(angleRad, axis);
-	std::cout << "Angle: " << RadiansToDegrees(angleRad) << " Axis: " << axis;
 }

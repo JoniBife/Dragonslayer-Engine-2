@@ -1,10 +1,8 @@
 #pragma once
 
-#include <ostream>
-
 #include "Core/Export.hpp"
-#include "Math/Vec3.hpp"
-#include "Math/Vec4.hpp"
+#include "Core/Macros.hpp"
+#include "MathFwd.hpp"
 
 struct ENGINE_API Vec2 {
 
@@ -58,4 +56,3 @@ struct ENGINE_API Vec2 {
 };
 
 ENGINE_API float Dot(const Vec2& a, const Vec2& b);
-ENGINE_API std::ostream& operator<<(std::ostream& os, const Vec2& vec2);

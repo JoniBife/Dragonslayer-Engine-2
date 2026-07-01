@@ -1,9 +1,8 @@
 #pragma once
 
 #include "Core/Export.hpp"
-#include "Vec4.hpp"
-#include "Vec3.hpp"
-#include "Mat3.hpp"
+#include "Core/Macros.hpp"
+#include "MathFwd.hpp"
 
 struct ENGINE_API Mat4 {
 
@@ -25,7 +24,7 @@ struct ENGINE_API Mat4 {
     static Mat4 Translation(float x, float y, float z);
     static Mat4 Translation(const Vec3& v);
     static Mat4 Rotation(float angleRad, const Vec3& axis);
-    static Mat4 RotationFromDir(const Vec3& dir, const Vec3& up = { 0.0f, 1.0f, 0.0f });
+    static Mat4 RotationFromDir(const Vec3& dir, const Vec3& up);
 
     static Mat4 LookAt(const Vec3& eye, const Vec3& center, const Vec3& up);
     static Mat4 Orthographic(float left, float right, float bottom, float top);
@@ -78,8 +77,4 @@ struct ENGINE_API Mat4 {
 
     /* Decomposes a transformation matrix in each of its components */
     void Decompose(Vec3& scale, Vec3& rotation, Vec3& position) const;
-
-    friend std::ostream& operator<<(std::ostream& os, const Mat4& mat4);
-    friend std::istream& operator>>(std::istream& is, Mat4& mat4);
-
 };
